@@ -1,10 +1,10 @@
-import { Sprite } from "kontra";
+import { GameObject } from "kontra";
 
-export class Unit {
+export abstract class Unit {
   baseHp: number;
   baseSpeed: number;
   baseAttack: number;
-  sprite: Sprite;
+  gameObject: GameObject;
 
   currentHp: number;
 
@@ -12,12 +12,12 @@ export class Unit {
     baseHp: number,
     baseSpeed: number,
     baseAttack: number,
-    sprite: Sprite
+    gameObject: GameObject
   ) {
     this.baseHp = baseHp;
     this.baseSpeed = baseSpeed;
     this.baseAttack = baseAttack;
-    this.sprite = sprite;
+    this.gameObject = gameObject;
 
     this.currentHp = baseHp;
   }

@@ -25,11 +25,11 @@ export class GameState {
   update() {
     for (let player of this.players) {
       for (let unit of player.units) {
-        unit.sprite.update();
+        unit.gameObject.update();
 
 
-        if (unit.sprite.x > this.canvas.width) {
-          unit.sprite.x = 0;
+        if (unit.gameObject.x > this.canvas.width) {
+          unit.gameObject.x = 0;
         }
       }
     }
@@ -37,7 +37,7 @@ export class GameState {
   render() {
     for (let player of this.players) {
       for (let unit of player.units) {
-        unit.sprite.render();
+        unit.gameObject.render();
       }
     }
   }
