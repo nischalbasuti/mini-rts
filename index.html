@@ -3,31 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kontra Game</title>
+    <title>Mini-RTS</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <div id="gameContainer">
+      <h1>Mini-RTS</h1>
 
-    <h1>Mini-RTS</h1>
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-    <hr>
-
-    <button>Create Villager</button>
-    <br>
-    <button>Create Inf</button>
-    <button>Create Arch</button>
+      <div id="buttonGroup">
+        <button id="createVillager">Create Villager</button>
+        <button id="createInf">Create Inf</button>
+        <button id="createArch">Create Arch</button>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
 
   <style>
+    /* Basic reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+    }
+
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
 
     #gameCanvas {
       border: 1px solid grey;
-      padding: 10;
-      margin: 10;
+      margin: 10px;
+      background-color: #222;
+    }
+
+    #buttonGroup {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #555;
     }
   </style>
 </html>
