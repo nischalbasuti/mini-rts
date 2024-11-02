@@ -8,7 +8,7 @@ export class VillagerUnit extends Unit {
 
   constructor(player: Player, x: number, y: number) {
     const gameObject = Sprite({
-      color: player.color,
+      color: player.color == "red" ? "pink" : "light" + player.color,
       x,
       y,
       width: VillagerUnit.WIDTH,
@@ -16,13 +16,13 @@ export class VillagerUnit extends Unit {
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
         console.log("clicked on villager unit", evt, self);
-        self.gameObject.color = "yellow"
-      }
+        self.gameObject.color = "yellow";
+      },
     });
 
     super(100, 10, 10, gameObject);
 
     const self = this;
-    track(gameObject)
+    track(gameObject);
   }
 }

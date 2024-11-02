@@ -22,7 +22,7 @@ window.gameState = gameState;
 
 const player1 = new Player("Player 1", "blue");
 gameState.players.push(player1);
-gameState.spawnProductionBuilding(
+const player1Building = gameState.spawnProductionBuilding(
   player1,
   canvas.width - ProductionBuilding.WIDTH,
   canvas.height - ProductionBuilding.HEIGHT
@@ -30,11 +30,22 @@ gameState.spawnProductionBuilding(
 
 const player2 = new Player("Player 2", "red");
 gameState.players.push(player2);
-gameState.spawnUnit(player2, 100, 40 + 10, InfantryUnit);
-gameState.spawnProductionBuilding(
+const player2Building = gameState.spawnProductionBuilding(
   player2,
   ProductionBuilding.WIDTH,
   ProductionBuilding.HEIGHT
+);
+gameState.spawnUnit(
+  player2,
+  player2Building.gameObject.position.x + ProductionBuilding.WIDTH / 2 + 10,
+  player2Building.gameObject.position.y,
+  InfantryUnit
+);
+gameState.spawnUnit(
+  player2,
+  player2Building.gameObject.position.x - ProductionBuilding.WIDTH / 2 - 10,
+  player2Building.gameObject.position.y,
+  VillagerUnit
 );
 
 const NUMBER_OF_TREES = 50;
@@ -64,10 +75,11 @@ loop.start();
 
 document.getElementById("createVillager")?.addEventListener("click", () => {
   console.log("Creating Villager");
+
   gameState.spawnUnit(
     player1,
-    canvas.width / 2,
-    canvas.height - 40 - 20,
+    player1Building.gameObject.position.x + ProductionBuilding.WIDTH / 2 + 10,
+    player1Building.gameObject.position.y,
     VillagerUnit
   );
 });
@@ -76,8 +88,8 @@ document.getElementById("createInf")?.addEventListener("click", () => {
   console.log("Creating Infantry");
   gameState.spawnUnit(
     player1,
-    canvas.width - 20,
-    canvas.height - 40 - 20,
+    player1Building.gameObject.position.x - ProductionBuilding.WIDTH / 2 - 10,
+    player1Building.gameObject.position.y,
     InfantryUnit
   );
 });

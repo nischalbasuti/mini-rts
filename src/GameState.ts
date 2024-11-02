@@ -48,11 +48,15 @@ export class GameState {
     y: number,
     unitType: typeof InfantryUnit | typeof VillagerUnit
   ) {
-    player.units.push(new unitType(player, x, y));
+    const unit = new unitType(player, x, y);
+    player.units.push(unit);
+    return unit;
   }
 
   spawnProductionBuilding(player: Player, x: number, y: number) {
-    player.buildings.push(new ProductionBuilding(player, x, y));
+    const building = new ProductionBuilding(player, x, y);
+    player.buildings.push(building);
+    return building;
   }
 
   update() {
