@@ -1,6 +1,6 @@
 import { GameObjectClass } from "kontra";
 import { Player } from "./Player";
-import { Unit } from "./Unit";
+import { Unit } from "./gameObjects/units/Unit";
 
 export class ArcherUnit extends Unit {
   constructor(player: Player) {

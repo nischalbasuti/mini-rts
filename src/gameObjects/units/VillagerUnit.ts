@@ -1,18 +1,22 @@
 import { Sprite, track } from "kontra";
-import { Player } from "./Player";
+import { Player } from "../../Player";
 import { Unit } from "./Unit";
 
-export class InfantryUnit extends Unit {
+export class VillagerUnit extends Unit {
+  static WIDTH = 10;
+  static HEIGHT = 10;
+
   constructor(player: Player, x: number, y: number) {
     const gameObject = Sprite({
       color: player.color,
       x,
       y,
-      width: 20,
-      height:40,
+      width: VillagerUnit.WIDTH,
+      height: VillagerUnit.HEIGHT,
       anchor: { x: 0.5, y: 0.5 },
-      onDown: function (evt: any) {
+      onDown: function (evt: MouseEvent) {
         console.log("clicked on infantry unit", evt, self);
+        self.gameObject.color = "yellow"
       }
     });
 
