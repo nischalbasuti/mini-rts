@@ -3,8 +3,8 @@ import { GameState } from "../../GameState";
 import { Player } from "../../Player";
 
 export class ProductionBuilding {
-  static WIDTH = 100;
-  static HEIGHT = 100;
+  static WIDTH = 50;
+  static HEIGHT = 50;
 
   baseHp: number = 100;
   gameObject: GameObject;
