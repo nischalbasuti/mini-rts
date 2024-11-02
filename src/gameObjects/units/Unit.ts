@@ -8,6 +8,8 @@ export abstract class Unit {
 
   currentHp: number;
 
+  isSelected: boolean = false;
+
   constructor(
     baseHp: number,
     baseSpeed: number,

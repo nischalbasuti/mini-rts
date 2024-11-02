@@ -38,7 +38,6 @@ export class GameState {
   spawnTreeLine(x: number, y: number, count: number) {
     for (let i = 0; i < count; i++) {
       this.spawnTree(x + i * 10, y);
-      
     }
   }
 
@@ -67,12 +66,14 @@ export class GameState {
 
       for (let building of player.buildings) {
         building.gameObject.update();
+        if (building.isSelected) {
+          building.wayPoint.update();
+        }
       }
     }
 
-
     for (let tree of this.trees) {
-      tree.gameObject.render();
+      tree.gameObject.update();
     }
   }
   render() {
@@ -83,6 +84,9 @@ export class GameState {
     for (let player of this.players) {
       for (let building of player.buildings) {
         building.gameObject.render();
+        if (building.isSelected) {
+          building.wayPoint.render();
+        }
       }
 
       for (let unit of player.units) {
@@ -97,6 +101,9 @@ export class GameState {
   }
 
   selectUnit(unit: Unit | ProductionBuilding) {
+    for (let selectedUnit of this.selection) {
+      if (selectedUnit !== unit) selectedUnit.isSelected = false;
+    }
     this.selection.push(unit);
   }
 }

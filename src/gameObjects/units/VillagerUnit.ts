@@ -17,6 +17,7 @@ export class VillagerUnit extends Unit {
       onDown: function (evt: MouseEvent) {
         console.log("clicked on villager unit", evt, self);
         self.gameObject.color = "yellow";
+        self.isSelected = true;
       },
     });
 

@@ -11,6 +11,10 @@ export class ProductionBuilding {
 
   currentHp: number;
 
+  wayPoint: GameObject;
+
+  isSelected: boolean = false;
+
   constructor(
     player: Player,
     x: number,
@@ -28,8 +32,18 @@ export class ProductionBuilding {
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
         console.log("clicked on ProductionBuilding", evt, self);
+        self.isSelected = true;
         GameState.getInstance().selectUnit(self);
       }
+    });
+
+    this.wayPoint = Sprite({
+      color: "white",
+      x: this.gameObject.x - ProductionBuilding.WIDTH/2 - 10,
+      y: this.gameObject.y - ProductionBuilding.HEIGHT/2 - 10,
+      width: 5,
+      height: 5,
+      anchor: { x: 0.5, y: 0.5 },
     });
 
     track(this.gameObject)
