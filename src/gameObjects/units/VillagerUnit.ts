@@ -15,7 +15,7 @@ export class VillagerUnit extends Unit {
       height: VillagerUnit.HEIGHT,
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
-        console.log("clicked on infantry unit", evt, self);
+        console.log("clicked on villager unit", evt, self);
         self.gameObject.color = "yellow"
       }
     });

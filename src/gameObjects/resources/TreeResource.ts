@@ -17,7 +17,7 @@ export class TreeResource {
       height: TreeResource.HEIGHT,
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
-        console.log("clicked on infantry unit", evt, self);
+        console.log("clicked on tree", evt, self);
       }
     });
   }
