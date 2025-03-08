@@ -32,6 +32,8 @@ export class ProductionBuilding {
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
         console.log("clicked on ProductionBuilding", evt, self);
+        GameState.getInstance().clearSelection();
+
         self.isSelected = true;
         GameState.getInstance().selectUnit(self);
       }

@@ -126,10 +126,16 @@ canvas.addEventListener("mousedown", (event) => {
   if (event.button === LEFT_MOUSE_BUTTON) {
     handleLeftClick(x, y);
   }
+
+  if (event.button === MIDDLE_MOUSE_BUTTON) {
+    gameState.clearSelection();
+  }
 });
 
 function handleLeftClick(x: number, y: number) {
   console.log("Left click", { x, y });
+  // can't do this because it's called after click on game objects, so selection will be cleared
+  // gameState.clearSelection();
 }
 
 function handleRightClick(x: number, y: number) {

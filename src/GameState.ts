@@ -67,6 +67,9 @@ export class GameState {
 
   readonly selection: (Unit | ProductionBuilding)[] = [];
   clearSelection() {
+    for (let selectedUnit of this.selection) {
+      selectedUnit.isSelected = false;
+    }
     this.selection.length = 0;
   }
 
