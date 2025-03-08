@@ -9,7 +9,7 @@ export class GameState {
     if (!GameState.instance) {
       if (!canvas) {
         throw new Error(
-          "Canvas is required for first time GameState initialization"
+          "Canvas is required for first time GameState initialization",
         );
       }
       GameState.instance = new GameState(canvas);
@@ -32,10 +32,15 @@ export class GameState {
     for (let player of this.players) {
       for (let unit of player.units) {
         unit.gameObject.update();
+
+        if (unit.isSelected) {
+          unit.wayPoint.update();
+        }
       }
 
       for (let building of player.buildings) {
         building.gameObject.update();
+
         if (building.isSelected) {
           building.wayPoint.update();
         }
@@ -47,7 +52,7 @@ export class GameState {
     }
   }
 
-  selection: (Unit | ProductionBuilding)[] = [];
+  readonly selection: (Unit | ProductionBuilding)[] = [];
   clearSelection() {
     this.selection.length = 0;
   }
@@ -57,5 +62,15 @@ export class GameState {
       if (selectedUnit !== unit) selectedUnit.isSelected = false;
     }
     this.selection.push(unit);
+  }
+
+  getSelectedUnits() {
+    return this.selection.filter((unit) => unit instanceof Unit) as Unit[];
+  }
+
+  getSelectedBuildings() {
+    return this.selection.filter(
+      (unit) => unit instanceof ProductionBuilding,
+    ) as ProductionBuilding[];
   }
 }

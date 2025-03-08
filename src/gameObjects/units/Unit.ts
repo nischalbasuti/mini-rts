@@ -1,4 +1,4 @@
-import { GameObject } from "kontra";
+import { GameObject, Sprite } from "kontra";
 
 export abstract class Unit {
   baseHp: number;
@@ -9,6 +9,8 @@ export abstract class Unit {
   currentHp: number;
 
   isSelected: boolean = false;
+
+  wayPoint: GameObject;
 
   constructor(
     baseHp: number,
@@ -22,5 +24,14 @@ export abstract class Unit {
     this.gameObject = gameObject;
 
     this.currentHp = baseHp;
+
+    this.wayPoint = Sprite({
+      color: "white",
+      x: this.gameObject.x,
+      y: this.gameObject.y,
+      width: 5,
+      height: 5,
+      anchor: { x: 0.5, y: 0.5 },
+    });
   }
 }
