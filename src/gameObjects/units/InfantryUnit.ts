@@ -7,6 +7,10 @@ export class InfantryUnit extends Unit {
   static WIDTH = 10;
   static HEIGHT = 10;
 
+  static BASE_SPEED = 1;
+  static BASE_ATTACK = 1;
+  static BASE_HP = 100;
+
   constructor(player: Player, x: number, y: number) {
     const gameObject = Sprite({
       color: player.color,
@@ -22,7 +26,12 @@ export class InfantryUnit extends Unit {
       },
     });
 
-    super(100, 10, 10, gameObject);
+    super(
+      InfantryUnit.BASE_HP,
+      InfantryUnit.BASE_SPEED,
+      InfantryUnit.BASE_ATTACK,
+      gameObject,
+    );
 
     const self = this;
     track(gameObject);

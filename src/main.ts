@@ -83,8 +83,8 @@ document.getElementById("createVillager")?.addEventListener("click", () => {
 
   spawner.spawnUnit(
     player1,
-    player1Building.gameObject.position.x + ProductionBuilding.WIDTH / 2 + 10,
-    player1Building.gameObject.position.y,
+    player1Building.wayPoint.position.x,
+    player1Building.wayPoint.position.y,
     VillagerUnit,
   );
 });
@@ -93,8 +93,8 @@ document.getElementById("createInf")?.addEventListener("click", () => {
   console.log("Creating Infantry");
   spawner.spawnUnit(
     player1,
-    player1Building.gameObject.position.x - ProductionBuilding.WIDTH / 2 - 10,
-    player1Building.gameObject.position.y,
+    player1Building.wayPoint.position.x,
+    player1Building.wayPoint.position.y,
     InfantryUnit,
   );
 });

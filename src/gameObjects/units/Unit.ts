@@ -12,6 +12,10 @@ export abstract class Unit {
 
   wayPoint: GameObject;
 
+  get speed() {
+    return this.baseSpeed;
+  }
+
   constructor(
     baseHp: number,
     baseSpeed: number,
