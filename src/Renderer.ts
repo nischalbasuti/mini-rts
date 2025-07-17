@@ -14,10 +14,7 @@ export class Renderer {
 
     for (let player of this.gameState.players) {
       for (let building of player.buildings) {
-        building.gameObject.render();
-        if (building.isSelected) {
-          building.wayPoint.render();
-        }
+        building.render();
       }
 
       for (let unit of player.units) {

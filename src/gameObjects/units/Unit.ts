@@ -53,15 +53,13 @@ export abstract class Unit {
       color: "yellow",
       x: 0,
       y: 0,
-      width: 15,
-      height: 15,
+      radius: (this.gameObject.width / 2 || this.gameObject.radius) + 3,
       anchor: { x: 0.5, y: 0.5 },
       opacity: 1,
     });
   }
 
   public update() {
-    // this.selectionBox.opacity = this.isSelected ? 1 : 0;
     this.selectionBox.position = this.gameObject.position;
 
     this.gameObject.update();

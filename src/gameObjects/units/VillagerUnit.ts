@@ -16,8 +16,7 @@ export class VillagerUnit extends Unit {
       color: player.color == "red" ? "pink" : "light" + player.color,
       x,
       y,
-      width: VillagerUnit.WIDTH,
-      height: VillagerUnit.HEIGHT,
+      radius: VillagerUnit.WIDTH / 2,
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
         console.log("clicked on villager unit", evt, self);
