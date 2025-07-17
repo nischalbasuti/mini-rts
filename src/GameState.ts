@@ -48,28 +48,15 @@ export class GameState {
     }
   }
 
-  readonly selection: (Unit | ProductionBuilding)[] = [];
+  readonly selection: Set<Unit | ProductionBuilding> = new Set();
   clearSelection() {
     for (let selectedUnit of this.selection) {
       selectedUnit.isSelected = false;
     }
-    this.selection.length = 0;
+    this.selection.clear();
   }
 
   selectUnit(unit: Unit | ProductionBuilding) {
-    for (let selectedUnit of this.selection) {
-      if (selectedUnit !== unit) selectedUnit.isSelected = false;
-    }
-    this.selection.push(unit);
-  }
-
-  getSelectedUnits() {
-    return this.selection.filter((unit) => unit instanceof Unit) as Unit[];
-  }
-
-  getSelectedBuildings() {
-    return this.selection.filter(
-      (unit) => unit instanceof ProductionBuilding,
-    ) as ProductionBuilding[];
+    this.selection.add(unit);
   }
 }
