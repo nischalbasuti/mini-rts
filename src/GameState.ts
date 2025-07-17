@@ -1,4 +1,5 @@
 import { ProductionBuilding } from "./gameObjects/buildings/ProductionBuilding";
+import { GoldResource } from "./gameObjects/resources/GoldResource";
 import { TreeResource } from "./gameObjects/resources/TreeResource";
 import { Unit } from "./gameObjects/units/Unit";
 import { Player } from "./Player";
@@ -23,6 +24,7 @@ export class GameState {
   canvas: HTMLCanvasElement;
   players: Player[] = [];
   trees: TreeResource[] = [];
+  gold: GoldResource[] = [];
 
   private constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -45,6 +47,10 @@ export class GameState {
 
     for (let tree of this.trees) {
       tree.gameObject.update();
+    }
+
+    for (let gold of this.gold) {
+      gold.gameObject.update();
     }
   }
 

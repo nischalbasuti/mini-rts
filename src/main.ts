@@ -68,17 +68,42 @@ spawner.spawnUnit(
 );
 
 const NUMBER_OF_TREES = 50;
-const HEIGHT_RATIO = 1 / 6;
+const TREE_LINE_HEIGHT_RATIO = 1 / 6;
+
+const GOLD_MINE_HEIGHT_RATIO = 1 / 3;
+const GOLD_MINE_WIDTH_RATIO = 1 / 5;
+const NUMBER_OF_GOLD = 20;
+
 spawner.spawnTreeLine(
   0,
-  canvas.height / 2 - canvas.height * HEIGHT_RATIO,
+  canvas.height / 2 - canvas.height * TREE_LINE_HEIGHT_RATIO,
   NUMBER_OF_TREES,
 );
+
 spawner.spawnTreeLine(
   canvas.width - 50 * TreeResource.WIDTH,
-  canvas.height / 2 + canvas.height * HEIGHT_RATIO,
+  canvas.height / 2 + canvas.height * TREE_LINE_HEIGHT_RATIO,
   NUMBER_OF_TREES,
 );
+
+spawner.spawnGoldCluster(
+  canvas.width / 2,
+  canvas.height / 2,
+  NUMBER_OF_GOLD * 2,
+  3,
+); // middle of map
+spawner.spawnGoldCluster(
+  canvas.width / 2 - canvas.width * GOLD_MINE_WIDTH_RATIO,
+  canvas.height / 2 - canvas.height * GOLD_MINE_HEIGHT_RATIO,
+  NUMBER_OF_GOLD,
+  2,
+); // top of map
+spawner.spawnGoldCluster(
+  canvas.width / 2 + canvas.width * GOLD_MINE_WIDTH_RATIO,
+  canvas.height / 2 + canvas.height * GOLD_MINE_HEIGHT_RATIO,
+  NUMBER_OF_GOLD,
+  2,
+); // bottom of map
 
 let loop = GameLoop({
   blur: true,
@@ -191,9 +216,7 @@ canvas.addEventListener("mouseup", (_event) => {
     const units = gameState.players.flatMap((player: Player) => player.units);
 
     for (const unit of units) {
-      console.log("testing for", unit);
       if (selectionBox.isIntersecting(unit)) {
-        console.log("Unit selected:", unit);
         gameState.selectUnit(unit);
         unit.isSelected = true;
       }

@@ -12,6 +12,10 @@ export class Renderer {
       tree.gameObject.render();
     }
 
+    for (let gold of this.gameState.gold) {
+      gold.gameObject.render();
+    }
+
     for (let player of this.gameState.players) {
       for (let building of player.buildings) {
         building.render();
