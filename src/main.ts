@@ -81,22 +81,32 @@ loop.start();
 document.getElementById("createVillager")?.addEventListener("click", () => {
   console.log("Creating Villager");
 
-  spawner.spawnUnit(
+  const spawnedUnit = spawner.spawnUnit(
     player1,
-    player1Building.wayPoint.position.x,
-    player1Building.wayPoint.position.y,
+    player1Building.gameObject.position.x,
+    player1Building.gameObject.position.y,
     VillagerUnit,
   );
+
+  spawnedUnit.wayPoint.position.set({
+    x: player1Building.wayPoint.position.x,
+    y: player1Building.wayPoint.position.y,
+  });
 });
 
 document.getElementById("createInf")?.addEventListener("click", () => {
   console.log("Creating Infantry");
-  spawner.spawnUnit(
+  const spawnedUnit = spawner.spawnUnit(
     player1,
-    player1Building.wayPoint.position.x,
-    player1Building.wayPoint.position.y,
+    player1Building.gameObject.position.x,
+    player1Building.gameObject.position.y,
     InfantryUnit,
   );
+
+  spawnedUnit.wayPoint.position.set({
+    x: player1Building.wayPoint.position.x,
+    y: player1Building.wayPoint.position.y,
+  });
 });
 
 document.getElementById("createArch")?.addEventListener("click", () => {
