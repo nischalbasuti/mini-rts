@@ -28,6 +28,7 @@ export class VillagerUnit extends Unit {
     });
 
     super(
+      player,
       VillagerUnit.BASE_HP,
       VillagerUnit.BASE_SPEED,
       VillagerUnit.BASE_ATTACK,

@@ -28,6 +28,7 @@ export class InfantryUnit extends Unit {
     });
 
     super(
+      player,
       InfantryUnit.BASE_HP,
       InfantryUnit.BASE_SPEED,
       InfantryUnit.BASE_ATTACK,
@@ -37,4 +38,5 @@ export class InfantryUnit extends Unit {
     const self = this;
     track(gameObject);
   }
+
 }

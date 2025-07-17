@@ -31,24 +31,7 @@ export class GameState {
   update() {
     for (let player of this.players) {
       for (let unit of player.units) {
-        unit.gameObject.update();
-
-        if (unit.isSelected) {
-          unit.wayPoint.update();
-        }
-
-        const wayPointDistance = unit.gameObject.position.distance(
-          unit.wayPoint.position,
-        );
-        if (wayPointDistance > 1) {
-          unit.gameObject.velocity = unit.wayPoint.position
-            .subtract(unit.gameObject.position)
-            .normalize()
-            .scale(unit.speed);
-
-        } else {
-          unit.gameObject.velocity.set({ x: 0, y: 0 });
-        }
+        unit.update();
       }
 
       for (let building of player.buildings) {

@@ -21,7 +21,7 @@ export class Renderer {
       }
 
       for (let unit of player.units) {
-        unit.gameObject.render();
+        unit.render();
       }
     }
   }
