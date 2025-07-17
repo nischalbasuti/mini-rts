@@ -32,6 +32,18 @@ const player1Building = spawner.spawnProductionBuilding(
   canvas.width - ProductionBuilding.WIDTH,
   canvas.height - ProductionBuilding.HEIGHT,
 );
+spawner.spawnUnit(
+  player1,
+  player1Building.gameObject.position.x + ProductionBuilding.WIDTH / 2 + 10,
+  player1Building.gameObject.position.y,
+  VillagerUnit,
+);
+spawner.spawnUnit(
+  player1,
+  player1Building.gameObject.position.x - ProductionBuilding.WIDTH / 2 - 10,
+  player1Building.gameObject.position.y,
+  InfantryUnit,
+);
 
 const player2 = new Player("Player 2", "red");
 gameState.players.push(player2);
