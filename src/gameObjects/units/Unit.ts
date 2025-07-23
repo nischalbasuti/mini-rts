@@ -8,9 +8,15 @@ export abstract class Unit {
   currentHp: number;
   player: Player;
 
-  gameObject: GameObject;
+  gameObject: Sprite;
   wayPoint: GameObject;
   selectionBox: Sprite;
+
+  static AnimationStates = {
+    idle: "idle",
+    moving: "moving",
+    attacking: "attacking",
+  } as const;
 
   private _isSelected: boolean = false;
   get isSelected() {
@@ -30,7 +36,7 @@ export abstract class Unit {
     baseHp: number,
     baseSpeed: number,
     baseAttack: number,
-    gameObject: GameObject,
+    gameObject: Sprite,
   ) {
     this.baseHp = baseHp;
     this.baseSpeed = baseSpeed;
@@ -74,8 +80,16 @@ export abstract class Unit {
         .subtract(this.gameObject.position)
         .normalize()
         .scale(this.speed);
+
+      let dx = this.gameObject.x - this.wayPoint.x;
+      let dy = this.gameObject.y - this.wayPoint.y;
+      this.gameObject.rotation = Math.atan2(dy, dx) - 3.14/2;
+
+      this.gameObject.playAnimation(Unit.AnimationStates.moving);
+      console.log("moving", wayPointDistance);
     } else {
       this.gameObject.velocity.set({ x: 0, y: 0 });
+      this.gameObject.playAnimation(Unit.AnimationStates.idle);
     }
   }
 
