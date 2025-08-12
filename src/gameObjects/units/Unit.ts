@@ -31,6 +31,20 @@ export abstract class Unit {
     return this.baseSpeed;
   }
 
+  isMoving() {
+    const wayPointDistance = this.gameObject.position.distance(
+      this.wayPoint.position,
+    );
+
+    return wayPointDistance > 1;
+  }
+
+  attacking: boolean = false; // temp for testing
+
+  isAttacking() {
+    return this.attacking;
+  }
+
   constructor(
     player: Player,
     baseHp: number,
@@ -72,10 +86,7 @@ export abstract class Unit {
     this.wayPoint.update();
     this.selectionBox.update();
 
-    const wayPointDistance = this.gameObject.position.distance(
-      this.wayPoint.position,
-    );
-    if (wayPointDistance > 1) {
+    if (this.isMoving()) {
       this.gameObject.velocity = this.wayPoint.position
         .subtract(this.gameObject.position)
         .normalize()
@@ -83,14 +94,21 @@ export abstract class Unit {
 
       let dx = this.gameObject.x - this.wayPoint.x;
       let dy = this.gameObject.y - this.wayPoint.y;
-      this.gameObject.rotation = Math.atan2(dy, dx) - 3.14/2;
+      this.gameObject.rotation = Math.atan2(dy, dx) - 3.14 / 2;
 
       this.gameObject.playAnimation(Unit.AnimationStates.moving);
-      console.log("moving", wayPointDistance);
-    } else {
-      this.gameObject.velocity.set({ x: 0, y: 0 });
-      this.gameObject.playAnimation(Unit.AnimationStates.idle);
+      return;
     }
+
+    if (this.isAttacking()) {
+      this.gameObject.velocity.set({ x: 0, y: 0 });
+      this.gameObject.playAnimation(Unit.AnimationStates.attacking);
+
+      return;
+    }
+
+    this.gameObject.velocity.set({ x: 0, y: 0 });
+    this.gameObject.playAnimation(Unit.AnimationStates.idle);
   }
 
   public render() {
