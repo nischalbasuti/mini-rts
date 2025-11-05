@@ -1,0 +1,52 @@
+# Mini-RTS
+
+## TODO
+- Create units
+    - [ ] create basic sprite (single frame, for place holder)
+        - [x] Swordsman
+        - [ ] Villager
+        - [ ] Town Center
+        - [ ] Archer
+    - 
+    - [x] add idle animations
+    - [x] implement unit selection
+    - [x] implement unit movement
+- pathing system
+    - [x] create waypoints
+    - [ ] add world grid/nodes/mesh...whatever
+    - [ ] implement pathfinding alghorithm
+    - [ ] deal with colliison/obstacles
+    - [ ] implement pathfinding as a group (swarming?) behavior
+- add attack
+    - [ ] create attack animations
+    - [ ] add attack mechanics
+- add resources gathering
+    - [ ] Create villager sprites
+    - [ ] Add gathering animations
+    - [x] spawn resources
+    - [ ] add resources UI
+        - [ ] display Gold and Wood collected
+        - [x] display selected unit info
+    - [ ] add resource nodes
+    - [ ] implement gathering mechanics
+- add building construction
+    - [ ] create building sprites
+    - [ ] add construction animations
+    - [ ] implement building placement
+    - [ ] implement construction mechanics
+        - [ ] Create villager sprites
+        - [ ] Add gathering animations
+- fog of war
+- data stuff
+    - [ ] clean up game state data structure. Should only represent the game state, MUST be independent of rendering and engine logic. (Maybe use ECS pattern?)
+    - [ ] serailize game state for saving/loading
+    - [ ] command issue queue system (used for multiplayer (and shift clicking too? might be independent idk))
+
+- UI improvements
+    - [ ] add health bars above units
+    - [ ] improve selection box visuals
+    - [ ] add minimap? Or make map fit in the screen?
+
+- [ ] implement sound effects
+- [ ] create main menu
+- [ ] Multiplayer support (way later)
