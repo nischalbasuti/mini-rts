@@ -11,7 +11,7 @@ import { Renderer } from "./Renderer";
 import type { Unit } from "./gameObjects/units/Unit";
 
 import swordsmanSpriteSheetPath from "./assets/swordsman.png";
-import villagerSpriteSheetPath from "./assets/swordsman.png";
+import villagerSpriteSheetPath from "./assets/villager.png";
 
 let { canvas } = init();
 
@@ -359,8 +359,8 @@ load(swordsmanSpriteSheetPath, villagerSpriteSheetPath).then(() => {
           frameRate: 20,
         },
         attacking: {
-          frames: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 18, 20],
-          frameRate: 20,
+          frames: [9, 10, 11, 12, 13, 14],
+          frameRate: 10,
         },
       },
     });

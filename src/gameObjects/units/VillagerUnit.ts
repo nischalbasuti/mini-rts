@@ -36,6 +36,8 @@ export class VillagerUnit extends Unit {
       gameObject,
     );
 
+    gameObject.playAnimation(Unit.AnimationStates.attacking);
+
     const self = this;
     track(gameObject);
   }

@@ -4,7 +4,7 @@
 - Create units
     - [ ] create basic sprite (single frame, for place holder)
         - [x] Swordsman
-        - [ ] Villager
+        - [x] Villager
         - [ ] Town Center
         - [ ] Archer
     - 
