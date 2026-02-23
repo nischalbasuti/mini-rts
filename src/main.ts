@@ -8,7 +8,7 @@ import { Spawner } from "./Spawner";
 import { Renderer } from "./Renderer";
 
 import { Unit } from "./gameObjects/units/Unit";
-import { pixelToGrid } from "./pathing/Grid";
+import { CELL_SIZE, GRID_COLS, GRID_ROWS, pixelToGrid } from "./pathing/Grid";
 import { findPath } from "./pathing/AStar";
 import { assignGroupDestinations } from "./pathing/GroupMovement";
 
@@ -35,8 +35,8 @@ function main() {
   gameState.players.push(player1);
   const player1Building = spawner.spawnProductionBuilding(
     player1,
-    canvas.width - ProductionBuilding.WIDTH,
-    canvas.height - ProductionBuilding.HEIGHT,
+    (GRID_COLS - 2) * CELL_SIZE,
+    (GRID_ROWS - 2) * CELL_SIZE,
   );
   spawnUnitFromBuilding(player1Building, player1, VillagerUnit);
   spawnUnitFromBuilding(player1Building, player1, InfantryUnit);
@@ -45,8 +45,8 @@ function main() {
   gameState.players.push(player2);
   const player2Building = spawner.spawnProductionBuilding(
     player2,
-    ProductionBuilding.WIDTH,
-    ProductionBuilding.HEIGHT,
+    2 * CELL_SIZE,
+    2 * CELL_SIZE,
   );
   spawnUnitFromBuilding(player2Building, player2, InfantryUnit);
   spawnUnitFromBuilding(player2Building, player2, VillagerUnit);
