@@ -12,7 +12,7 @@ export class VillagerUnit extends Unit {
   static BASE_SPEED = 1;
   static BASE_ATTACK = 1;
   static BASE_HP = 50;
-  static BASE_RANGE = 1.0;
+  static BASE_RANGE = 1.5;
 
   static SPRITE_SHEET: SpriteSheet;
 
@@ -76,11 +76,6 @@ export class VillagerUnit extends Unit {
 
     if (!this.carriedResource || this.carriedResource.type !== resType) {
       this.carriedResource = { type: resType as "wood" | "gold", amount: 0 };
-    }
-
-    if (this.carriedResource.amount >= VillagerUnit.CARRY_CAPACITY) {
-      this.currentAction = null;
-      return;
     }
 
     this._actionTickTimer++;
