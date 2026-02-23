@@ -3,12 +3,14 @@ import { GameState } from "./GameState";
 import { Player } from "./Player";
 import { InfantryUnit } from "./gameObjects/units/InfantryUnit";
 import { VillagerUnit } from "./gameObjects/units/VillagerUnit";
-import { TreeResource } from "./gameObjects/resources/TreeResource";
 import { ProductionBuilding } from "./gameObjects/buildings/ProductionBuilding";
 import { Spawner } from "./Spawner";
 import { Renderer } from "./Renderer";
 
-import type { Unit } from "./gameObjects/units/Unit";
+import { Unit } from "./gameObjects/units/Unit";
+import { pixelToGrid } from "./pathing/Grid";
+import { findPath } from "./pathing/AStar";
+import { assignGroupDestinations } from "./pathing/GroupMovement";
 
 import swordsmanSpriteSheetPath from "./assets/swordsman.png";
 import villagerSpriteSheetPath from "./assets/villager.png";
@@ -36,18 +38,8 @@ function main() {
     canvas.width - ProductionBuilding.WIDTH,
     canvas.height - ProductionBuilding.HEIGHT,
   );
-  spawner.spawnUnit(
-    player1,
-    player1Building.gameObject.position.x + ProductionBuilding.WIDTH / 2 + 10,
-    player1Building.gameObject.position.y,
-    VillagerUnit,
-  );
-  spawner.spawnUnit(
-    player1,
-    player1Building.gameObject.position.x - ProductionBuilding.WIDTH / 2 - 10,
-    player1Building.gameObject.position.y,
-    InfantryUnit,
-  );
+  spawnUnitFromBuilding(player1Building, player1, VillagerUnit);
+  spawnUnitFromBuilding(player1Building, player1, InfantryUnit);
 
   const player2 = new Player("Player 2", "red");
   gameState.players.push(player2);
@@ -56,56 +48,41 @@ function main() {
     ProductionBuilding.WIDTH,
     ProductionBuilding.HEIGHT,
   );
-  spawner.spawnUnit(
-    player2,
-    player2Building.gameObject.position.x + ProductionBuilding.WIDTH / 2 + 10,
-    player2Building.gameObject.position.y,
-    InfantryUnit,
-  );
-  spawner.spawnUnit(
-    player2,
-    player2Building.gameObject.position.x - ProductionBuilding.WIDTH / 2 - 10,
-    player2Building.gameObject.position.y,
-    VillagerUnit,
-  );
+  spawnUnitFromBuilding(player2Building, player2, InfantryUnit);
+  spawnUnitFromBuilding(player2Building, player2, VillagerUnit);
 
-  const NUMBER_OF_TREES = 50;
-  const TREE_LINE_HEIGHT_RATIO = 1 / 6;
-
-  const GOLD_MINE_HEIGHT_RATIO = 1 / 3;
-  const GOLD_MINE_WIDTH_RATIO = 1 / 5;
-  const NUMBER_OF_GOLD = 20;
-
+  // Tree lines — left side and right side barriers
   spawner.spawnTreeLine(
-    0,
-    canvas.height / 2 - canvas.height * TREE_LINE_HEIGHT_RATIO,
-    NUMBER_OF_TREES,
+    canvas.width * 0.05,
+    canvas.height * 0.35,
+    5,
   );
 
   spawner.spawnTreeLine(
-    canvas.width - 50 * TreeResource.WIDTH,
-    canvas.height / 2 + canvas.height * TREE_LINE_HEIGHT_RATIO,
-    NUMBER_OF_TREES,
+    canvas.width - 4 * 1.5 * 32,
+    canvas.height * 0.65,
+    5,
   );
 
+  // Gold clusters — symmetric for both players + larger middle
+  spawner.spawnGoldCluster(
+    canvas.width * 0.2,
+    canvas.height * 0.2,
+    4,
+    3,
+  ); // top-left near player 2
+  spawner.spawnGoldCluster(
+    canvas.width * 0.8,
+    canvas.height * 0.8,
+    4,
+    3,
+  ); // bottom-right near player 1
   spawner.spawnGoldCluster(
     canvas.width / 2,
     canvas.height / 2,
-    NUMBER_OF_GOLD * 2,
+    6,
     3,
-  ); // middle of map
-  spawner.spawnGoldCluster(
-    canvas.width / 2 - canvas.width * GOLD_MINE_WIDTH_RATIO,
-    canvas.height / 2 - canvas.height * GOLD_MINE_HEIGHT_RATIO,
-    NUMBER_OF_GOLD,
-    2,
-  ); // top of map
-  spawner.spawnGoldCluster(
-    canvas.width / 2 + canvas.width * GOLD_MINE_WIDTH_RATIO,
-    canvas.height / 2 + canvas.height * GOLD_MINE_HEIGHT_RATIO,
-    NUMBER_OF_GOLD,
-    2,
-  ); // bottom of map
+  ); // middle of map, larger
 
   let loop = GameLoop({
     blur: true,
@@ -120,35 +97,43 @@ function main() {
 
   loop.start();
 
-  document.getElementById("createVillager")?.addEventListener("click", () => {
-    console.log("Creating Villager");
+  // Debug mode toggle
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "g") {
+      gameState.debugMode = !gameState.debugMode;
+    }
+  });
 
+  function spawnUnitFromBuilding(
+    building: ProductionBuilding,
+    player: Player,
+    unitType: typeof InfantryUnit | typeof VillagerUnit,
+  ) {
     const spawnedUnit = spawner.spawnUnit(
-      player1,
-      player1Building.gameObject.position.x,
-      player1Building.gameObject.position.y,
-      VillagerUnit,
+      player,
+      building.gameObject.position.x,
+      building.gameObject.position.y,
+      unitType,
     );
 
-    spawnedUnit.wayPoint.position.set({
-      x: player1Building.wayPoint.position.x,
-      y: player1Building.wayPoint.position.y,
-    });
+    const start = pixelToGrid(spawnedUnit.gameObject.x, spawnedUnit.gameObject.y);
+    const goal = pixelToGrid(building.wayPoint.x, building.wayPoint.y);
+    const path = findPath(gameState.grid, start, goal);
+    if (path && path.length > 0) {
+      spawnedUnit.setPath(path);
+    }
+
+    return spawnedUnit;
+  }
+
+  document.getElementById("createVillager")?.addEventListener("click", () => {
+    console.log("Creating Villager");
+    spawnUnitFromBuilding(player1Building, player1, VillagerUnit);
   });
 
   document.getElementById("createInf")?.addEventListener("click", () => {
     console.log("Creating Infantry");
-    const spawnedUnit = spawner.spawnUnit(
-      player1,
-      player1Building.gameObject.position.x,
-      player1Building.gameObject.position.y,
-      InfantryUnit,
-    );
-
-    spawnedUnit.wayPoint.position.set({
-      x: player1Building.wayPoint.position.x,
-      y: player1Building.wayPoint.position.y,
-    });
+    spawnUnitFromBuilding(player1Building, player1, InfantryUnit);
   });
 
   document.getElementById("createArch")?.addEventListener("click", () => {
@@ -311,8 +296,32 @@ function main() {
 
   function handleRightClick(x: number, y: number) {
     console.log("Right click", { x, y });
-    for (const unit of gameState.selection) {
-      unit.wayPoint.position.set({ x, y });
+
+    const units: Unit[] = [];
+    for (const selected of gameState.selection) {
+      if (selected instanceof Unit) {
+        units.push(selected);
+      } else if (selected instanceof ProductionBuilding) {
+        selected.wayPoint.position.set({ x, y });
+      }
+    }
+
+    if (units.length === 0) return;
+
+    const grid = gameState.grid;
+    const destinations = assignGroupDestinations(grid, x, y, units.length);
+
+    for (let i = 0; i < units.length; i++) {
+      const unit = units[i];
+      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      const dest = destinations[i];
+
+      if (dest) {
+        const path = findPath(grid, unitGridPos, dest);
+        if (path && path.length > 0) {
+          unit.setPath(path);
+        }
+      }
     }
   }
 }

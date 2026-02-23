@@ -1,5 +1,7 @@
 import { GameObject, Sprite } from "kontra";
 import { Player } from "../../Player";
+import { GridPoint, gridToPixel, pixelToGrid } from "../../pathing/Grid";
+import { GameState } from "../../GameState";
 
 export abstract class Unit {
   baseHp: number;
@@ -37,6 +39,11 @@ export abstract class Unit {
     );
 
     return wayPointDistance > 1;
+  }
+
+  private _pathQueue: GridPoint[] = [];
+  get pathQueue(): readonly GridPoint[] {
+    return this._pathQueue;
   }
 
   attacking: boolean = false; // temp for testing
@@ -77,6 +84,34 @@ export abstract class Unit {
       anchor: { x: 0.5, y: 0.5 },
       opacity: 1,
     });
+
+    // Reserve spawn cell so other units won't path here
+    const grid = GameState.getInstance().grid;
+    const spawnCell = pixelToGrid(this.gameObject.x, this.gameObject.y);
+    grid.reserveCell(spawnCell.col, spawnCell.row, this);
+  }
+
+  public setPath(path: GridPoint[]) {
+    // Clear old reservation
+    const grid = GameState.getInstance().grid;
+    grid.unreserveCellsForUnit(this);
+
+    this._pathQueue = path;
+
+    // Reserve the final destination cell
+    if (path.length > 0) {
+      const dest = path[path.length - 1];
+      grid.reserveCell(dest.col, dest.row, this);
+    }
+
+    this.advanceToNextPathPoint();
+  }
+
+  private advanceToNextPathPoint() {
+    if (this._pathQueue.length === 0) return;
+    const next = this._pathQueue.shift()!;
+    const pixel = gridToPixel(next.col, next.row);
+    this.wayPoint.position.set({ x: pixel.x, y: pixel.y });
   }
 
   public update() {
@@ -97,6 +132,12 @@ export abstract class Unit {
       this.gameObject.rotation = Math.atan2(dy, dx) - 3.14 / 2;
 
       this.gameObject.playAnimation(Unit.AnimationStates.moving);
+      return;
+    }
+
+    // Reached current waypoint — advance to next path point if available
+    if (this._pathQueue.length > 0) {
+      this.advanceToNextPathPoint();
       return;
     }
 

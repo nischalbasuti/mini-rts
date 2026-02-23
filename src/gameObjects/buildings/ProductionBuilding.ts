@@ -3,8 +3,8 @@ import { GameState } from "../../GameState";
 import { Player } from "../../Player";
 
 export class ProductionBuilding {
-  static WIDTH = 50;
-  static HEIGHT = 50;
+  static WIDTH = 64;
+  static HEIGHT = 64;
 
   baseHp: number = 100;
   gameObject: GameObject;
@@ -28,6 +28,7 @@ export class ProductionBuilding {
       height: ProductionBuilding.HEIGHT,
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
+        if (evt.button !== 0) return;
         console.log("clicked on ProductionBuilding", evt, self);
         GameState.getInstance().clearSelection();
 

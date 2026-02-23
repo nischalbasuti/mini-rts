@@ -22,6 +22,7 @@ export class InfantryUnit extends Unit {
       anchor: { x: 0.5, y: 0.5 },
       animations: InfantryUnit.SPRITE_SHEET.animations,
       onDown: function (evt: MouseEvent) {
+        if (evt.button !== 0) return;
         console.log("clicked on infantry unit", evt, self);
         GameState.getInstance().clearSelection();
         GameState.getInstance().selectUnit(self);

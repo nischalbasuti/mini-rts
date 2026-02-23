@@ -1,8 +1,8 @@
 import { GameObject, Sprite } from "kontra";
 
 export class TreeResource {
-  static WIDTH = 10;
-  static HEIGHT = 10;
+  static WIDTH = 32;
+  static HEIGHT = 32;
 
   baseQuantity: number = 100;
   currentQuantity: number = 100;

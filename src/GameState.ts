@@ -3,6 +3,7 @@ import { GoldResource } from "./gameObjects/resources/GoldResource";
 import { TreeResource } from "./gameObjects/resources/TreeResource";
 import { Unit } from "./gameObjects/units/Unit";
 import { Player } from "./Player";
+import { Grid, GRID_COLS, GRID_ROWS } from "./pathing/Grid";
 
 export class GameState {
   static instance: GameState;
@@ -25,6 +26,8 @@ export class GameState {
   players: Player[] = [];
   trees: TreeResource[] = [];
   gold: GoldResource[] = [];
+  grid: Grid = new Grid(GRID_COLS, GRID_ROWS);
+  debugMode: boolean = false;
 
   private constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;

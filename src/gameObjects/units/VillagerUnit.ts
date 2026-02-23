@@ -21,6 +21,7 @@ export class VillagerUnit extends Unit {
       anchor: { x: 0.5, y: 0.5 },
       animations: VillagerUnit.SPRITE_SHEET.animations,
       onDown: function (evt: MouseEvent) {
+        if (evt.button !== 0) return;
         console.log("clicked on villager unit", evt, self);
         GameState.getInstance().clearSelection();
         GameState.getInstance().selectUnit(self);
