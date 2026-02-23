@@ -2,6 +2,8 @@ import { Sprite, SpriteSheet, track } from "kontra";
 import { Player } from "../../Player";
 import { Unit } from "./Unit";
 import { GameState } from "../../GameState";
+import { TreeResource } from "../resources/TreeResource";
+import { GoldResource } from "../resources/GoldResource";
 
 export class VillagerUnit extends Unit {
   static WIDTH = 64;
@@ -10,7 +12,14 @@ export class VillagerUnit extends Unit {
   static BASE_SPEED = 1;
   static BASE_ATTACK = 1;
   static BASE_HP = 50;
+  static BASE_RANGE = 1.0;
+
   static SPRITE_SHEET: SpriteSheet;
+
+  static GATHER_RATE = 5;
+  static CARRY_CAPACITY = 20;
+
+  carriedResource: { type: "wood" | "gold"; amount: number } | null = null;
 
   constructor(player: Player, x: number, y: number) {
     const gameObject = Sprite({
@@ -34,12 +43,56 @@ export class VillagerUnit extends Unit {
       VillagerUnit.BASE_HP,
       VillagerUnit.BASE_SPEED,
       VillagerUnit.BASE_ATTACK,
+      VillagerUnit.BASE_RANGE,
       gameObject,
     );
 
-    gameObject.playAnimation(Unit.AnimationStates.attacking);
+    gameObject.playAnimation(Unit.AnimationStates.idle);
 
     const self = this;
     track(gameObject);
+  }
+
+  canGather(): boolean {
+    return true;
+  }
+
+  protected executeGather(target: TreeResource | GoldResource) {
+    this.faceTarget(target.gameObject);
+
+    if (target.currentQuantity <= 0) {
+      this.currentAction = null;
+      return;
+    }
+
+    if (!this.isTargetInRange(target.gameObject)) {
+      this.currentAction = null;
+      return;
+    }
+
+    this.gameObject.playAnimation(Unit.AnimationStates.gathering);
+
+    const resType = target instanceof TreeResource ? "wood" : "gold";
+
+    if (!this.carriedResource || this.carriedResource.type !== resType) {
+      this.carriedResource = { type: resType as "wood" | "gold", amount: 0 };
+    }
+
+    if (this.carriedResource.amount >= VillagerUnit.CARRY_CAPACITY) {
+      this.currentAction = null;
+      return;
+    }
+
+    this._actionTickTimer++;
+    if (this._actionTickTimer >= Unit.ACTION_TICK_INTERVAL) {
+      this._actionTickTimer = 0;
+      const gathered = Math.min(
+        VillagerUnit.GATHER_RATE,
+        target.currentQuantity,
+        VillagerUnit.CARRY_CAPACITY - this.carriedResource.amount,
+      );
+      target.currentQuantity -= gathered;
+      this.carriedResource.amount += gathered;
+    }
   }
 }

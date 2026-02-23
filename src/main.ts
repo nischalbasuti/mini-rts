@@ -8,9 +8,11 @@ import { Spawner } from "./Spawner";
 import { Renderer } from "./Renderer";
 
 import { Unit } from "./gameObjects/units/Unit";
-import { CELL_SIZE, GRID_COLS, GRID_ROWS, pixelToGrid } from "./pathing/Grid";
+import { TreeResource } from "./gameObjects/resources/TreeResource";
+import { GoldResource } from "./gameObjects/resources/GoldResource";
+import { CELL_SIZE, GRID_COLS, GRID_ROWS, pixelToGrid, gridToPixel } from "./pathing/Grid";
 import { findPath } from "./pathing/AStar";
-import { assignGroupDestinations } from "./pathing/GroupMovement";
+import { assignGroupDestinations, findAdjacentWalkableCells } from "./pathing/GroupMovement";
 
 import swordsmanSpriteSheetPath from "./assets/swordsman.png";
 import villagerSpriteSheetPath from "./assets/villager.png";
@@ -309,6 +311,24 @@ function main() {
     if (units.length === 0) return;
 
     const grid = gameState.grid;
+    const clickCell = pixelToGrid(x, y);
+    const cell = grid.getCell(clickCell.col, clickCell.row);
+    const occupant = cell?.getOccupying()
+      ?? grid.getReservedCells().get(`${clickCell.col},${clickCell.row}`);
+
+    if (occupant instanceof TreeResource || occupant instanceof GoldResource) {
+      handleResourceClick(units, occupant);
+    } else if (occupant instanceof Unit && occupant.player !== units[0].player) {
+      handleEnemyClick(units, occupant);
+    } else if (occupant instanceof ProductionBuilding && occupant.player !== units[0].player) {
+      handleEnemyBuildingClick(units, occupant);
+    } else {
+      handleMoveClick(units, x, y);
+    }
+  }
+
+  function handleMoveClick(units: Unit[], x: number, y: number) {
+    const grid = gameState.grid;
     const destinations = assignGroupDestinations(grid, x, y, units.length);
 
     for (let i = 0; i < units.length; i++) {
@@ -319,8 +339,82 @@ function main() {
       if (dest) {
         const path = findPath(grid, unitGridPos, dest);
         if (path && path.length > 0) {
-          unit.setPath(path);
+          unit.setAction({ type: "move" }, path);
         }
+      }
+    }
+  }
+
+  function handleResourceClick(units: Unit[], target: TreeResource | GoldResource) {
+    const grid = gameState.grid;
+    const go = target.gameObject;
+    const w = "WIDTH" in (target.constructor as any) ? (target.constructor as any).WIDTH : 32;
+    const h = "HEIGHT" in (target.constructor as any) ? (target.constructor as any).HEIGHT : 32;
+    const adjacentCells = findAdjacentWalkableCells(grid, go.x, go.y, w, h, units.length);
+
+    for (let i = 0; i < units.length; i++) {
+      const unit = units[i];
+      const dest = adjacentCells[i];
+      if (!dest) continue;
+
+      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      const path = findPath(grid, unitGridPos, dest);
+      if (path && path.length > 0) {
+        if (unit.canGather()) {
+          unit.setAction({ type: "gather", target }, path);
+        } else {
+          unit.setAction({ type: "move" }, path);
+        }
+      } else if (path && path.length === 0) {
+        // Already adjacent
+        if (unit.canGather()) {
+          unit.setAction({ type: "gather", target });
+        }
+      }
+    }
+  }
+
+  function handleEnemyClick(units: Unit[], target: Unit) {
+    const grid = gameState.grid;
+    const targetCell = pixelToGrid(target.gameObject.x, target.gameObject.y);
+    const targetCenter = gridToPixel(targetCell.col, targetCell.row);
+    const adjacentCells = findAdjacentWalkableCells(grid, targetCenter.x, targetCenter.y, CELL_SIZE, CELL_SIZE, units.length);
+
+    for (let i = 0; i < units.length; i++) {
+      const unit = units[i];
+      const dest = adjacentCells[i];
+      if (!dest) continue;
+
+      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      const path = findPath(grid, unitGridPos, dest);
+      if (path && path.length > 0) {
+        unit.setAction({ type: "attack", target }, path);
+      } else if (path && path.length === 0) {
+        unit.setAction({ type: "attack", target });
+      }
+    }
+  }
+
+  function handleEnemyBuildingClick(units: Unit[], target: ProductionBuilding) {
+    const grid = gameState.grid;
+    const go = target.gameObject;
+    const adjacentCells = findAdjacentWalkableCells(
+      grid, go.x, go.y,
+      ProductionBuilding.WIDTH, ProductionBuilding.HEIGHT,
+      units.length,
+    );
+
+    for (let i = 0; i < units.length; i++) {
+      const unit = units[i];
+      const dest = adjacentCells[i];
+      if (!dest) continue;
+
+      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      const path = findPath(grid, unitGridPos, dest);
+      if (path && path.length > 0) {
+        unit.setAction({ type: "attack", target }, path);
+      } else if (path && path.length === 0) {
+        unit.setAction({ type: "attack", target });
       }
     }
   }
@@ -347,6 +441,10 @@ load(swordsmanSpriteSheetPath, villagerSpriteSheetPath).then(() => {
           frames: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 18, 20],
           frameRate: 20,
         },
+        gathering: {
+          frames: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 18, 20],
+          frameRate: 20,
+        },
       },
     });
   };
@@ -370,6 +468,10 @@ load(swordsmanSpriteSheetPath, villagerSpriteSheetPath).then(() => {
         attacking: {
           frames: [9, 10, 11, 12, 13, 14],
           frameRate: 10,
+        },
+        gathering: {
+          frames: [9, 10, 11, 12, 13, 14],
+          frameRate: 6,
         },
       },
     });

@@ -8,6 +8,7 @@ export class ProductionBuilding {
 
   baseHp: number = 100;
   gameObject: GameObject;
+  player: Player;
 
   currentHp: number;
 
@@ -17,6 +18,7 @@ export class ProductionBuilding {
   selectionBox: Sprite;
 
   constructor(player: Player, x: number, y: number) {
+    this.player = player;
     this.currentHp = this.baseHp;
 
     const self = this;

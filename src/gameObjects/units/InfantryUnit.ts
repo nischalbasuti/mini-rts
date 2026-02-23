@@ -10,6 +10,7 @@ export class InfantryUnit extends Unit {
   static BASE_SPEED = 1;
   static BASE_ATTACK = 1;
   static BASE_HP = 100;
+  static BASE_RANGE = 1.5;
 
   static SPRITE_SHEET: SpriteSheet;
 
@@ -35,6 +36,7 @@ export class InfantryUnit extends Unit {
       InfantryUnit.BASE_HP,
       InfantryUnit.BASE_SPEED,
       InfantryUnit.BASE_ATTACK,
+      InfantryUnit.BASE_RANGE,
       gameObject,
     );
 

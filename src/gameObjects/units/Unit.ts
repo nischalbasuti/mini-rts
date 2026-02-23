@@ -1,12 +1,14 @@
 import { GameObject, Sprite } from "kontra";
 import { Player } from "../../Player";
-import { GridPoint, gridToPixel, pixelToGrid } from "../../pathing/Grid";
+import { CELL_SIZE, GridPoint, gridToPixel, pixelToGrid } from "../../pathing/Grid";
 import { GameState } from "../../GameState";
+import { UnitAction, Attackable } from "./UnitAction";
 
 export abstract class Unit {
   baseHp: number;
   baseSpeed: number;
   baseAttack: number;
+  baseRange: number;
   currentHp: number;
   player: Player;
 
@@ -18,7 +20,10 @@ export abstract class Unit {
     idle: "idle",
     moving: "moving",
     attacking: "attacking",
+    gathering: "gathering",
   } as const;
+
+  static ACTION_TICK_INTERVAL = 60;
 
   private _isSelected: boolean = false;
   get isSelected() {
@@ -46,10 +51,11 @@ export abstract class Unit {
     return this._pathQueue;
   }
 
-  attacking: boolean = false; // temp for testing
+  currentAction: UnitAction | null = null;
+  protected _actionTickTimer: number = 0;
 
-  isAttacking() {
-    return this.attacking;
+  canGather(): boolean {
+    return false;
   }
 
   constructor(
@@ -57,11 +63,13 @@ export abstract class Unit {
     baseHp: number,
     baseSpeed: number,
     baseAttack: number,
+    baseRange: number,
     gameObject: Sprite,
   ) {
     this.baseHp = baseHp;
     this.baseSpeed = baseSpeed;
     this.baseAttack = baseAttack;
+    this.baseRange = baseRange;
     this.gameObject = gameObject;
     this.player = player;
 
@@ -91,6 +99,14 @@ export abstract class Unit {
     grid.reserveCell(spawnCell.col, spawnCell.row, this);
   }
 
+  public setAction(action: UnitAction, path?: GridPoint[]) {
+    this.currentAction = action;
+    this._actionTickTimer = 0;
+    if (path) {
+      this.setPath(path);
+    }
+  }
+
   public setPath(path: GridPoint[]) {
     // Clear old reservation
     const grid = GameState.getInstance().grid;
@@ -114,6 +130,47 @@ export abstract class Unit {
     this.wayPoint.position.set({ x: pixel.x, y: pixel.y });
   }
 
+  isTargetInRange(target: { x: number; y: number }): boolean {
+    const dx = target.x - this.gameObject.x;
+    const dy = target.y - this.gameObject.y;
+    const distance = Math.hypot(dx, dy);
+    const rangeInPixels = this.baseRange * CELL_SIZE;
+    return distance <= rangeInPixels;
+  }
+
+  faceTarget(target: { x: number; y: number }) {
+    const dx = this.gameObject.x - target.x;
+    const dy = this.gameObject.y - target.y;
+    this.gameObject.rotation = Math.atan2(dy, dx) - Math.PI / 2;
+  }
+
+  protected executeAttack(target: Attackable) {
+    this.faceTarget(target.gameObject);
+
+    if (target.currentHp <= 0) {
+      this.currentAction = null;
+      return;
+    }
+
+    if (!this.isTargetInRange(target.gameObject)) {
+      this.currentAction = null;
+      return;
+    }
+
+    this.gameObject.playAnimation(Unit.AnimationStates.attacking);
+
+    this._actionTickTimer++;
+    if (this._actionTickTimer >= Unit.ACTION_TICK_INTERVAL) {
+      this._actionTickTimer = 0;
+      target.currentHp -= this.baseAttack;
+    }
+  }
+
+  protected executeGather(_target: unknown) {
+    // Base class does nothing — override in VillagerUnit
+    this.currentAction = null;
+  }
+
   public update() {
     this.selectionBox.position = this.gameObject.position;
 
@@ -129,7 +186,7 @@ export abstract class Unit {
 
       let dx = this.gameObject.x - this.wayPoint.x;
       let dy = this.gameObject.y - this.wayPoint.y;
-      this.gameObject.rotation = Math.atan2(dy, dx) - 3.14 / 2;
+      this.gameObject.rotation = Math.atan2(dy, dx) - Math.PI / 2;
 
       this.gameObject.playAnimation(Unit.AnimationStates.moving);
       return;
@@ -141,14 +198,23 @@ export abstract class Unit {
       return;
     }
 
-    if (this.isAttacking()) {
-      this.gameObject.velocity.set({ x: 0, y: 0 });
-      this.gameObject.playAnimation(Unit.AnimationStates.attacking);
+    // Path done — execute action if any
+    this.gameObject.velocity.set({ x: 0, y: 0 });
 
-      return;
+    if (this.currentAction) {
+      switch (this.currentAction.type) {
+        case "attack":
+          this.executeAttack(this.currentAction.target);
+          return;
+        case "gather":
+          this.executeGather(this.currentAction.target);
+          return;
+        case "move":
+          this.currentAction = null;
+          break;
+      }
     }
 
-    this.gameObject.velocity.set({ x: 0, y: 0 });
     this.gameObject.playAnimation(Unit.AnimationStates.idle);
   }
 
