@@ -211,7 +211,7 @@ export abstract class Unit {
     gameState.selection.delete(this);
   }
 
-  private renderSelectionRing() {
+  private renderSelectionRing(selected: boolean) {
     const ctx = GameState.getInstance().canvas.getContext("2d");
     if (!ctx) return;
 
@@ -226,15 +226,16 @@ export abstract class Unit {
     ctx.beginPath();
     ctx.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2);
     ctx.strokeStyle = this.player.color;
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.8;
+    ctx.lineWidth = selected ? 2 : 1.5;
+    ctx.globalAlpha = selected ? 0.8 : 0.5;
     ctx.stroke();
     ctx.restore();
   }
 
   public render() {
+    this.renderSelectionRing(this.isSelected);
+
     if (this.isSelected) {
-      this.renderSelectionRing();
       this.wayPoint.render();
     }
 
