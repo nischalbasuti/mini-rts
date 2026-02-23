@@ -33,7 +33,7 @@ export class VillagerUnit extends Unit {
         if (evt.button !== 0) return;
         console.log("clicked on villager unit", evt, self);
         GameState.getInstance().clearSelection();
-        GameState.getInstance().selectUnit(self);
+        GameState.getInstance().select(self);
         self.isSelected = true;
       },
     });

@@ -12,10 +12,13 @@
 
       <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-      <div id="buttonGroup">
-        <button id="createVillager">Create Villager</button>
-        <button id="createInf">Create Inf</button>
-        <button id="createArch">Create Arch</button>
+      <div id="bottomBar">
+        <div id="buttonGroup">
+          <button id="createVillager">Create Villager</button>
+          <button id="createInf">Create Inf</button>
+          <button id="createArch">Create Arch</button>
+        </div>
+        <div id="selectionDetails"></div>
       </div>
     </div>
 
@@ -64,10 +67,26 @@
       background: grey;
     }
 
+    #bottomBar {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
     #buttonGroup {
       display: flex;
       gap: 10px;
-      margin-top: 10px;
+    }
+
+    #selectionDetails {
+      font-family: monospace;
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.4;
+      min-width: 180px;
+      height: 140px;
+      overflow: hidden;
     }
 
     button {

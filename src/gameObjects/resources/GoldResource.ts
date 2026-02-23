@@ -1,4 +1,5 @@
-import { GameObject, Sprite } from "kontra";
+import { GameObject, Sprite, track } from "kontra";
+import { GameState } from "../../GameState";
 
 export class GoldResource {
   static WIDTH = 32;
@@ -7,8 +8,10 @@ export class GoldResource {
   baseQuantity: number = 100;
   currentQuantity: number = 100;
   gameObject: GameObject;
+  isSelected: boolean = false;
 
   constructor(x: number, y: number) {
+    const self = this;
     this.gameObject = Sprite({
       color: "gold",
       x,
@@ -17,8 +20,13 @@ export class GoldResource {
       height: GoldResource.HEIGHT,
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
-        console.log("clicked on gold", evt, self);
+        if (evt.button !== 0) return;
+        GameState.getInstance().clearSelection();
+        self.isSelected = true;
+        GameState.getInstance().select(self);
       }
     });
+
+    track(this.gameObject);
   }
 }

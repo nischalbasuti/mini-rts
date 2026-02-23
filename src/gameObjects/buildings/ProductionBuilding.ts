@@ -35,7 +35,7 @@ export class ProductionBuilding {
         GameState.getInstance().clearSelection();
 
         self.isSelected = true;
-        GameState.getInstance().selectUnit(self);
+        GameState.getInstance().select(self);
       },
     });
 

@@ -26,7 +26,7 @@ export class InfantryUnit extends Unit {
         if (evt.button !== 0) return;
         console.log("clicked on infantry unit", evt, self);
         GameState.getInstance().clearSelection();
-        GameState.getInstance().selectUnit(self);
+        GameState.getInstance().select(self);
         self.isSelected = true;
       },
     });

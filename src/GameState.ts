@@ -5,6 +5,8 @@ import { Unit } from "./gameObjects/units/Unit";
 import { Player } from "./Player";
 import { Grid, GRID_COLS, GRID_ROWS } from "./pathing/Grid";
 
+export type Selectable = Unit | ProductionBuilding | TreeResource | GoldResource;
+
 export class GameState {
   static instance: GameState;
   static getInstance(canvas?: HTMLCanvasElement) {
@@ -57,15 +59,15 @@ export class GameState {
     }
   }
 
-  readonly selection: Set<Unit | ProductionBuilding> = new Set();
+  readonly selection: Set<Selectable> = new Set();
   clearSelection() {
-    for (let selectedUnit of this.selection) {
-      selectedUnit.isSelected = false;
+    for (let selected of this.selection) {
+      selected.isSelected = false;
     }
     this.selection.clear();
   }
 
-  selectUnit(unit: Unit | ProductionBuilding) {
-    this.selection.add(unit);
+  select(entity: Selectable) {
+    this.selection.add(entity);
   }
 }

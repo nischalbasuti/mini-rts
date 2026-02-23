@@ -94,6 +94,7 @@ function main() {
     render: function () {
       renderer.render();
       SelectionBox.getInstance().sprite.render();
+      updateSelectionPanel();
     },
   });
 
@@ -207,7 +208,7 @@ function main() {
 
       for (const unit of units) {
         if (selectionBox.isIntersecting(unit)) {
-          gameState.selectUnit(unit);
+          gameState.select(unit);
           unit.isSelected = true;
         }
       }
@@ -294,6 +295,65 @@ function main() {
       this.sprite.height = 0;
       this.rectangle = null;
     }
+  }
+
+  const selectionDetailsEl = document.getElementById("selectionDetails")!;
+
+  function updateSelectionPanel() {
+    if (gameState.selection.size === 0) {
+      selectionDetailsEl.innerHTML = "";
+      return;
+    }
+
+    if (gameState.selection.size === 1) {
+      const entity = gameState.selection.values().next().value!;
+
+      if (entity instanceof Unit) {
+        const name = entity instanceof VillagerUnit ? "Villager" : "Infantry";
+        let lines = [
+          `<b>${name}</b>`,
+          `Player: ${entity.player.name}`,
+          `HP: ${entity.currentHp} / ${entity.baseHp}`,
+          `Speed: ${entity.baseSpeed}`,
+          `Attack: ${entity.baseAttack}`,
+          `Range: ${entity.baseRange}`,
+          `Action: ${entity.currentAction?.type ?? "idle"}`,
+        ];
+        if (entity instanceof VillagerUnit && entity.carriedResource) {
+          lines.push(`Carried: ${entity.carriedResource.amount} ${entity.carriedResource.type}`);
+        }
+        selectionDetailsEl.innerHTML = lines.join("<br>");
+      } else if (entity instanceof ProductionBuilding) {
+        selectionDetailsEl.innerHTML = [
+          `<b>Barracks</b>`,
+          `Player: ${entity.player.name}`,
+          `HP: ${entity.currentHp} / ${entity.baseHp}`,
+        ].join("<br>");
+      } else if (entity instanceof TreeResource) {
+        selectionDetailsEl.innerHTML = [
+          `<b>Tree</b>`,
+          `Quantity: ${entity.currentQuantity} / ${entity.baseQuantity}`,
+        ].join("<br>");
+      } else if (entity instanceof GoldResource) {
+        selectionDetailsEl.innerHTML = [
+          `<b>Gold</b>`,
+          `Quantity: ${entity.currentQuantity} / ${entity.baseQuantity}`,
+        ].join("<br>");
+      }
+      return;
+    }
+
+    // Multi-selection
+    let unitCount = 0;
+    let buildingCount = 0;
+    for (const entity of gameState.selection) {
+      if (entity instanceof Unit) unitCount++;
+      else if (entity instanceof ProductionBuilding) buildingCount++;
+    }
+    const parts: string[] = [];
+    if (unitCount > 0) parts.push(`${unitCount} unit${unitCount > 1 ? "s" : ""}`);
+    if (buildingCount > 0) parts.push(`${buildingCount} building${buildingCount > 1 ? "s" : ""}`);
+    selectionDetailsEl.innerHTML = `<b>${parts.join(", ")} selected</b>`;
   }
 
   function handleRightClick(x: number, y: number) {
