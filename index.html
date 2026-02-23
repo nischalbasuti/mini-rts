@@ -13,6 +13,10 @@
       <canvas id="gameCanvas" width="800" height="600"></canvas>
 
       <div id="bottomBar">
+        <div id="resourceDisplay">
+          <span id="woodCount">Wood: 0</span>
+          <span id="goldCount">Gold: 0</span>
+        </div>
         <div id="buttonGroup">
           <button id="createVillager">Create Villager</button>
           <button id="createInf">Create Inf</button>
@@ -72,6 +76,26 @@
       align-items: flex-start;
       gap: 20px;
       margin-top: 10px;
+    }
+
+    #resourceDisplay {
+      display: flex;
+      gap: 16px;
+      font-family: monospace;
+      font-size: 16px;
+      color: #ccc;
+      align-items: center;
+      padding: 10px 16px;
+      background-color: #222;
+      border: 1px solid #444;
+    }
+
+    #resourceDisplay #woodCount {
+      color: #8b6;
+    }
+
+    #resourceDisplay #goldCount {
+      color: #fd0;
     }
 
     #buttonGroup {

@@ -95,8 +95,19 @@ function main() {
       renderer.render();
       SelectionBox.getInstance().sprite.render();
       updateSelectionPanel();
+      updateResourceDisplay();
     },
   });
+
+  const woodCountEl = document.getElementById("woodCount")!;
+  const goldCountEl = document.getElementById("goldCount")!;
+
+  function updateResourceDisplay() {
+    const player = gameState.players[0];
+    if (!player) return;
+    woodCountEl.textContent = `Wood: ${player.wood}`;
+    goldCountEl.textContent = `Gold: ${player.gold}`;
+  }
 
   loop.start();
 

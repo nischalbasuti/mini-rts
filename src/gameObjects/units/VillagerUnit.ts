@@ -88,6 +88,7 @@ export class VillagerUnit extends Unit {
       );
       target.currentQuantity -= gathered;
       this.carriedResource.amount += gathered;
+      this.player[resType] += gathered;
     }
   }
 }

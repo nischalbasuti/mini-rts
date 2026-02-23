@@ -7,6 +7,9 @@ export class Player {
   readonly buildings: ProductionBuilding[] = [];
   readonly color: string;
 
+  wood: number = 0;
+  gold: number = 0;
+
   constructor(name: string, color: string) {
     this.name = name;
     this.color = color;
