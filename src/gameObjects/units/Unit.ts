@@ -1,4 +1,4 @@
-import { GameObject, Sprite } from "kontra";
+import { GameObject, Sprite, untrack } from "kontra";
 import { Player } from "../../Player";
 import { CELL_SIZE, GridPoint, gridToPixel, pixelToGrid } from "../../pathing/Grid";
 import { GameState } from "../../GameState";
@@ -14,7 +14,6 @@ export abstract class Unit {
 
   gameObject: Sprite;
   wayPoint: GameObject;
-  selectionBox: Sprite;
 
   static AnimationStates = {
     idle: "idle",
@@ -82,15 +81,6 @@ export abstract class Unit {
       width: 5,
       height: 5,
       anchor: { x: 0.5, y: 0.5 },
-    });
-
-    this.selectionBox = Sprite({
-      color: "yellow",
-      x: 0,
-      y: 0,
-      radius: (this.gameObject.width / 2 || this.gameObject.radius) + 3,
-      anchor: { x: 0.5, y: 0.5 },
-      opacity: 1,
     });
 
     // Reserve spawn cell so other units won't path here
@@ -172,11 +162,8 @@ export abstract class Unit {
   }
 
   public update() {
-    this.selectionBox.position = this.gameObject.position;
-
     this.gameObject.update();
     this.wayPoint.update();
-    this.selectionBox.update();
 
     if (this.isMoving()) {
       this.gameObject.velocity = this.wayPoint.position
@@ -218,10 +205,37 @@ export abstract class Unit {
     this.gameObject.playAnimation(Unit.AnimationStates.idle);
   }
 
+  public dispose(gameState: GameState) {
+    untrack(this.gameObject);
+    gameState.grid.unreserveCellsForUnit(this);
+    gameState.selection.delete(this);
+  }
+
+  private renderSelectionRing() {
+    const ctx = GameState.getInstance().canvas.getContext("2d");
+    if (!ctx) return;
+
+    const x = this.gameObject.x;
+    const visualHeight = this.gameObject.height * (this.gameObject.scaleY || 1);
+    const visualWidth = this.gameObject.width * (this.gameObject.scaleX || 1);
+    const y = this.gameObject.y + visualHeight / 3;
+    const radiusX = visualWidth / 2;
+    const radiusY = radiusX * 0.35;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = this.player.color;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.8;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   public render() {
     if (this.isSelected) {
+      this.renderSelectionRing();
       this.wayPoint.render();
-      this.selectionBox.render();
     }
 
     this.gameObject.render();

@@ -1,4 +1,4 @@
-import { GameObject, Sprite, track } from "kontra";
+import { GameObject, Sprite, track, untrack } from "kontra";
 import { GameState } from "../../GameState";
 
 export class TreeResource {
@@ -28,5 +28,16 @@ export class TreeResource {
     });
 
     track(this.gameObject);
+  }
+
+  dispose(gameState: GameState) {
+    untrack(this.gameObject);
+    gameState.grid.removeObstacle(
+      this.gameObject.x,
+      this.gameObject.y,
+      TreeResource.WIDTH,
+      TreeResource.HEIGHT,
+    );
+    gameState.selection.delete(this);
   }
 }

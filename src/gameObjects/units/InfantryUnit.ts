@@ -8,7 +8,7 @@ export class InfantryUnit extends Unit {
   static HEIGHT = 64;
 
   static BASE_SPEED = 1;
-  static BASE_ATTACK = 1;
+  static BASE_ATTACK = 20;
   static BASE_HP = 100;
   static BASE_RANGE = 1.5;
 

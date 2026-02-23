@@ -1,4 +1,4 @@
-import { GameObject, Sprite, track } from "kontra";
+import { GameObject, Sprite, track, untrack } from "kontra";
 import { GameState } from "../../GameState";
 import { Player } from "../../Player";
 
@@ -15,7 +15,6 @@ export class ProductionBuilding {
   wayPoint: GameObject;
 
   isSelected: boolean = false;
-  selectionBox: Sprite;
 
   constructor(player: Player, x: number, y: number) {
     this.player = player;
@@ -48,32 +47,48 @@ export class ProductionBuilding {
       anchor: { x: 0.5, y: 0.5 },
     });
 
-    this.selectionBox = Sprite({
-      color: "yellow",
-      x: 0,
-      y: 0,
-      width: this.gameObject.width + 3,
-      height: this.gameObject.height + 3,
-      anchor: { x: 0.5, y: 0.5 },
-      opacity: 1,
-    });
-    this.selectionBox.position = this.gameObject.position;
-
     track(this.gameObject);
   }
 
-  public update() {
-    this.selectionBox.position = this.gameObject.position;
+  public dispose(gameState: GameState) {
+    untrack(this.gameObject);
+    gameState.grid.removeObstacle(
+      this.gameObject.x,
+      this.gameObject.y,
+      ProductionBuilding.WIDTH,
+      ProductionBuilding.HEIGHT,
+    );
+    gameState.selection.delete(this);
+  }
 
+  public update() {
     this.gameObject.update();
     this.wayPoint.update();
-    this.selectionBox.update();
+  }
+
+  private renderSelectionRing() {
+    const ctx = GameState.getInstance().canvas.getContext("2d");
+    if (!ctx) return;
+
+    const x = this.gameObject.x;
+    const y = this.gameObject.y + ProductionBuilding.HEIGHT / 3;
+    const radiusX = ProductionBuilding.WIDTH / 2 + 4;
+    const radiusY = radiusX * 0.35;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = this.player.color;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.8;
+    ctx.stroke();
+    ctx.restore();
   }
 
   public render() {
     if (this.isSelected) {
+      this.renderSelectionRing();
       this.wayPoint.render();
-      this.selectionBox.render();
     }
 
     this.gameObject.render();

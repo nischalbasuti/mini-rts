@@ -10,14 +10,14 @@ export class VillagerUnit extends Unit {
   static HEIGHT = 64;
 
   static BASE_SPEED = 1;
-  static BASE_ATTACK = 1;
+  static BASE_ATTACK = 10;
   static BASE_HP = 50;
   static BASE_RANGE = 1.5;
 
   static SPRITE_SHEET: SpriteSheet;
 
-  static GATHER_RATE = 5;
-  static CARRY_CAPACITY = 20;
+  static GATHER_RATE = 20;
+  static CARRY_CAPACITY = 10;
 
   carriedResource: { type: "wood" | "gold"; amount: number } | null = null;
 
@@ -84,7 +84,7 @@ export class VillagerUnit extends Unit {
       const gathered = Math.min(
         VillagerUnit.GATHER_RATE,
         target.currentQuantity,
-        VillagerUnit.CARRY_CAPACITY - this.carriedResource.amount,
+        // VillagerUnit.CARRY_CAPACITY - this.carriedResource.amount,
       );
       target.currentQuantity -= gathered;
       this.carriedResource.amount += gathered;

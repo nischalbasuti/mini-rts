@@ -57,6 +57,34 @@ export class GameState {
     for (let gold of this.gold) {
       gold.gameObject.update();
     }
+
+    // Dispose dead/depleted entities
+    for (let player of this.players) {
+      for (let i = player.units.length - 1; i >= 0; i--) {
+        if (player.units[i].currentHp <= 0) {
+          player.units[i].dispose(this);
+          player.units.splice(i, 1);
+        }
+      }
+      for (let i = player.buildings.length - 1; i >= 0; i--) {
+        if (player.buildings[i].currentHp <= 0) {
+          player.buildings[i].dispose(this);
+          player.buildings.splice(i, 1);
+        }
+      }
+    }
+    for (let i = this.trees.length - 1; i >= 0; i--) {
+      if (this.trees[i].currentQuantity <= 0) {
+        this.trees[i].dispose(this);
+        this.trees.splice(i, 1);
+      }
+    }
+    for (let i = this.gold.length - 1; i >= 0; i--) {
+      if (this.gold[i].currentQuantity <= 0) {
+        this.gold[i].dispose(this);
+        this.gold.splice(i, 1);
+      }
+    }
   }
 
   readonly selection: Set<Selectable> = new Set();
