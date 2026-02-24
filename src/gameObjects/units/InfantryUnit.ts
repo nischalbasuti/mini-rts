@@ -4,8 +4,8 @@ import { Unit } from "./Unit";
 import { GameState } from "../../GameState";
 
 export class InfantryUnit extends Unit {
-  static WIDTH = 64;
-  static HEIGHT = 64;
+  static WIDTH = 32;
+  static HEIGHT = 32;
 
   static BASE_SPEED = 1;
   static BASE_ATTACK = 20;

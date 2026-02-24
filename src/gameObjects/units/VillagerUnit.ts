@@ -6,8 +6,8 @@ import { TreeResource } from "../resources/TreeResource";
 import { GoldResource } from "../resources/GoldResource";
 
 export class VillagerUnit extends Unit {
-  static WIDTH = 64;
-  static HEIGHT = 64;
+  static WIDTH = 32;
+  static HEIGHT = 32;
 
   static BASE_SPEED = 1;
   static BASE_ATTACK = 10;
