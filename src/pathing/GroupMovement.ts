@@ -39,8 +39,8 @@ export function assignGroupDestinations(
 }
 
 /**
- * Find walkable cells adjacent to a target entity's grid footprint.
- * BFS collects 8-neighbors of occupied cells, sorted by distance to target center.
+ * Find all walkable cells adjacent to a target entity's grid footprint.
+ * Scans the 1-ring of 8-neighbors around each footprint cell.
  */
 export function findAdjacentWalkableCells(
   grid: Grid,
@@ -48,7 +48,6 @@ export function findAdjacentWalkableCells(
   targetY: number,
   targetWidth: number,
   targetHeight: number,
-  count: number,
 ): GridPoint[] {
   // Compute grid footprint of the target entity (center-anchored)
   const left = targetX - targetWidth / 2;
@@ -69,48 +68,60 @@ export function findAdjacentWalkableCells(
     }
   }
 
-  // BFS from occupied cells outward to find walkable neighbors
-  const visited = new Set<string>(occupiedSet);
+  // 1-ring neighbor scan: check 8 neighbors of each footprint cell
+  const seen = new Set<string>();
   const candidates: GridPoint[] = [];
-  const queue: GridPoint[] = [];
 
-  // Seed BFS with occupied cells
   for (let r = startRow; r <= endRow; r++) {
     for (let c = startCol; c <= endCol; c++) {
-      queue.push({ col: c, row: r });
-    }
-  }
-
-  // Target center in grid coords for distance sorting
-  const centerCol = (startCol + endCol) / 2;
-  const centerRow = (startRow + endRow) / 2;
-
-  while (queue.length > 0 && candidates.length < count * 2) {
-    const current = queue.shift()!;
-
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        if (dr === 0 && dc === 0) continue;
-        const nc = current.col + dc;
-        const nr = current.row + dr;
-        const k = `${nc},${nr}`;
-        if (!visited.has(k) && grid.isInBounds(nc, nr)) {
-          visited.add(k);
-          if (grid.isWalkable(nc, nr)) {
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nc = c + dc;
+          const nr = r + dr;
+          const k = `${nc},${nr}`;
+          if (seen.has(k) || occupiedSet.has(k)) continue;
+          seen.add(k);
+          if (grid.isInBounds(nc, nr) && grid.isWalkable(nc, nr)) {
             candidates.push({ col: nc, row: nr });
           }
-          queue.push({ col: nc, row: nr });
         }
       }
     }
   }
 
-  // Sort by distance to target center
-  candidates.sort((a, b) => {
-    const distA = Math.hypot(a.col - centerCol, a.row - centerRow);
-    const distB = Math.hypot(b.col - centerCol, b.row - centerRow);
-    return distA - distB;
-  });
+  return candidates;
+}
 
-  return candidates.slice(0, count);
+/**
+ * Greedy assignment: for each unit position, pick the closest unassigned candidate cell.
+ * Returns (GridPoint | null)[] aligned with unitPositions.
+ */
+export function assignClosestCells(
+  candidates: GridPoint[],
+  unitPositions: GridPoint[],
+): (GridPoint | null)[] {
+  const assigned = new Set<number>();
+  const result: (GridPoint | null)[] = [];
+
+  for (const pos of unitPositions) {
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for (let i = 0; i < candidates.length; i++) {
+      if (assigned.has(i)) continue;
+      const dist = Math.hypot(candidates[i].col - pos.col, candidates[i].row - pos.row);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = i;
+      }
+    }
+    if (bestIdx >= 0) {
+      assigned.add(bestIdx);
+      result.push(candidates[bestIdx]);
+    } else {
+      result.push(null);
+    }
+  }
+
+  return result;
 }

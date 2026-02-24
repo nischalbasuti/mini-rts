@@ -53,6 +53,44 @@ export function gridToPixel(col: number, row: number): { x: number; y: number } 
   };
 }
 
+export function isAdjacentCell(a: GridPoint, b: GridPoint): boolean {
+  const dc = Math.abs(a.col - b.col);
+  const dr = Math.abs(a.row - b.row);
+  return dc <= 1 && dr <= 1 && (dc !== 0 || dr !== 0);
+}
+
+export function getFootprintCells(
+  centerX: number,
+  centerY: number,
+  width: number,
+  height: number,
+): GridPoint[] {
+  const left = centerX - width / 2;
+  const top = centerY - height / 2;
+  const right = centerX + width / 2;
+  const bottom = centerY + height / 2;
+
+  const startCol = Math.floor(left / CELL_SIZE);
+  const endCol = Math.floor((right - 1) / CELL_SIZE);
+  const startRow = Math.floor(top / CELL_SIZE);
+  const endRow = Math.floor((bottom - 1) / CELL_SIZE);
+
+  const cells: GridPoint[] = [];
+  for (let r = startRow; r <= endRow; r++) {
+    for (let c = startCol; c <= endCol; c++) {
+      cells.push({ col: c, row: r });
+    }
+  }
+  return cells;
+}
+
+export function isAdjacentToFootprint(cell: GridPoint, footprint: GridPoint[]): boolean {
+  for (const fp of footprint) {
+    if (isAdjacentCell(cell, fp)) return true;
+  }
+  return false;
+}
+
 export class Grid {
   width: number;
   height: number;

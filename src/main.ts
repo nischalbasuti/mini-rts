@@ -10,9 +10,9 @@ import { Renderer } from "./Renderer";
 import { Unit } from "./gameObjects/units/Unit";
 import { TreeResource } from "./gameObjects/resources/TreeResource";
 import { GoldResource } from "./gameObjects/resources/GoldResource";
-import { CELL_SIZE, GRID_COLS, GRID_ROWS, pixelToGrid, gridToPixel } from "./pathing/Grid";
+import { CELL_SIZE, GRID_COLS, GRID_ROWS, pixelToGrid, gridToPixel, getFootprintCells, isAdjacentToFootprint, GridPoint } from "./pathing/Grid";
 import { findPath } from "./pathing/AStar";
-import { assignGroupDestinations, findAdjacentWalkableCells } from "./pathing/GroupMovement";
+import { assignGroupDestinations, findAdjacentWalkableCells, assignClosestCells } from "./pathing/GroupMovement";
 
 import swordsmanSpriteSheetPath from "./assets/swordsman.png";
 import villagerSpriteSheetPath from "./assets/villager.png";
@@ -406,12 +406,11 @@ function main() {
       const unit = units[i];
       const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
       const dest = destinations[i];
+      if (!dest) continue;
 
-      if (dest) {
-        const path = findPath(grid, unitGridPos, dest);
-        if (path && path.length > 0) {
-          unit.setAction({ type: "move" }, path);
-        }
+      const path = findPath(grid, unitGridPos, dest);
+      if (path && path.length > 0) {
+        unit.setAction({ type: "move" }, path);
       }
     }
   }
@@ -421,25 +420,29 @@ function main() {
     const go = target.gameObject;
     const w = "WIDTH" in (target.constructor as any) ? (target.constructor as any).WIDTH : 32;
     const h = "HEIGHT" in (target.constructor as any) ? (target.constructor as any).HEIGHT : 32;
-    const adjacentCells = findAdjacentWalkableCells(grid, go.x, go.y, w, h, units.length);
+    const footprint = getFootprintCells(go.x, go.y, w, h);
+    const allCandidates = findAdjacentWalkableCells(grid, go.x, go.y, w, h);
+    const unitPositions = units.map(u => pixelToGrid(u.gameObject.x, u.gameObject.y));
+    const assigned = assignClosestCells(allCandidates, unitPositions);
 
     for (let i = 0; i < units.length; i++) {
       const unit = units[i];
-      const dest = adjacentCells[i];
-      if (!dest) continue;
+      const unitGridPos = unitPositions[i];
+      const dest = assigned[i];
 
-      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      if (isAdjacentToFootprint(unitGridPos, footprint) && unit.canGather()) {
+        unit.faceTarget(go);
+        unit.setAction({ type: "gather", target });
+        continue;
+      }
+
+      if (!dest) continue;
       const path = findPath(grid, unitGridPos, dest);
       if (path && path.length > 0) {
         if (unit.canGather()) {
           unit.setAction({ type: "gather", target }, path);
         } else {
           unit.setAction({ type: "move" }, path);
-        }
-      } else if (path && path.length === 0) {
-        // Already adjacent
-        if (unit.canGather()) {
-          unit.setAction({ type: "gather", target });
         }
       }
     }
@@ -449,19 +452,26 @@ function main() {
     const grid = gameState.grid;
     const targetCell = pixelToGrid(target.gameObject.x, target.gameObject.y);
     const targetCenter = gridToPixel(targetCell.col, targetCell.row);
-    const adjacentCells = findAdjacentWalkableCells(grid, targetCenter.x, targetCenter.y, CELL_SIZE, CELL_SIZE, units.length);
+    const footprint: GridPoint[] = [targetCell];
+    const allCandidates = findAdjacentWalkableCells(grid, targetCenter.x, targetCenter.y, CELL_SIZE, CELL_SIZE);
+    const unitPositions = units.map(u => pixelToGrid(u.gameObject.x, u.gameObject.y));
+    const assigned = assignClosestCells(allCandidates, unitPositions);
 
     for (let i = 0; i < units.length; i++) {
       const unit = units[i];
-      const dest = adjacentCells[i];
-      if (!dest) continue;
+      const unitGridPos = unitPositions[i];
+      const dest = assigned[i];
 
-      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      if (isAdjacentToFootprint(unitGridPos, footprint)) {
+        unit.faceTarget(target.gameObject);
+        unit.setAction({ type: "attack", target });
+        continue;
+      }
+
+      if (!dest) continue;
       const path = findPath(grid, unitGridPos, dest);
       if (path && path.length > 0) {
         unit.setAction({ type: "attack", target }, path);
-      } else if (path && path.length === 0) {
-        unit.setAction({ type: "attack", target });
       }
     }
   }
@@ -469,23 +479,26 @@ function main() {
   function handleEnemyBuildingClick(units: Unit[], target: ProductionBuilding) {
     const grid = gameState.grid;
     const go = target.gameObject;
-    const adjacentCells = findAdjacentWalkableCells(
-      grid, go.x, go.y,
-      ProductionBuilding.WIDTH, ProductionBuilding.HEIGHT,
-      units.length,
-    );
+    const footprint = getFootprintCells(go.x, go.y, ProductionBuilding.WIDTH, ProductionBuilding.HEIGHT);
+    const allCandidates = findAdjacentWalkableCells(grid, go.x, go.y, ProductionBuilding.WIDTH, ProductionBuilding.HEIGHT);
+    const unitPositions = units.map(u => pixelToGrid(u.gameObject.x, u.gameObject.y));
+    const assigned = assignClosestCells(allCandidates, unitPositions);
 
     for (let i = 0; i < units.length; i++) {
       const unit = units[i];
-      const dest = adjacentCells[i];
-      if (!dest) continue;
+      const unitGridPos = unitPositions[i];
+      const dest = assigned[i];
 
-      const unitGridPos = pixelToGrid(unit.gameObject.x, unit.gameObject.y);
+      if (isAdjacentToFootprint(unitGridPos, footprint)) {
+        unit.faceTarget(go);
+        unit.setAction({ type: "attack", target });
+        continue;
+      }
+
+      if (!dest) continue;
       const path = findPath(grid, unitGridPos, dest);
       if (path && path.length > 0) {
         unit.setAction({ type: "attack", target }, path);
-      } else if (path && path.length === 0) {
-        unit.setAction({ type: "attack", target });
       }
     }
   }
