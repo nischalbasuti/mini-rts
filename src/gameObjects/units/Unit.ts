@@ -120,15 +120,22 @@ export abstract class Unit {
     this.wayPoint.position.set({ x: pixel.x, y: pixel.y });
   }
 
-  isTargetInRange(target: { x: number; y: number }): boolean {
-    const dx = target.x - this.gameObject.x;
-    const dy = target.y - this.gameObject.y;
+  isTargetInRange(target: { x: number; y: number; width?: number; height?: number }): boolean {
+    const halfW = (target.width ?? 0) / 2;
+    const halfH = (target.height ?? 0) / 2;
+
+    // Distance to nearest point on target's bounding box
+    const nearestX = Math.max(target.x - halfW, Math.min(this.gameObject.x, target.x + halfW));
+    const nearestY = Math.max(target.y - halfH, Math.min(this.gameObject.y, target.y + halfH));
+
+    const dx = nearestX - this.gameObject.x;
+    const dy = nearestY - this.gameObject.y;
     const distance = Math.hypot(dx, dy);
     const rangeInPixels = this.baseRange * CELL_SIZE;
     return distance <= rangeInPixels;
   }
 
-  faceTarget(target: { x: number; y: number }) {
+  faceTarget(target: { x: number; y: number; width?: number; height?: number }) {
     const dx = this.gameObject.x - target.x;
     const dy = this.gameObject.y - target.y;
     this.gameObject.rotation = Math.atan2(dy, dx) - Math.PI / 2;

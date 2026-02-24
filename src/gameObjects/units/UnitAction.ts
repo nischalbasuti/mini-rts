@@ -3,7 +3,7 @@ import type { GoldResource } from "../resources/GoldResource";
 
 export interface Attackable {
   currentHp: number;
-  gameObject: { x: number; y: number };
+  gameObject: { x: number; y: number; width?: number; height?: number };
 }
 
 export type UnitAction =
