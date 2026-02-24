@@ -1,10 +1,11 @@
-import { GameObject, Sprite, track, untrack } from "kontra";
+import { GameObject, Sprite, SpriteSheet, track, untrack } from "kontra";
 import { GameState } from "../../GameState";
 import { Player } from "../../Player";
 
 export class ProductionBuilding {
   static WIDTH = 64;
   static HEIGHT = 64;
+  static SPRITE_SHEET: SpriteSheet;
 
   baseHp: number = 100;
   gameObject: GameObject;
@@ -22,11 +23,9 @@ export class ProductionBuilding {
 
     const self = this;
     this.gameObject = Sprite({
-      color: "dark" + player.color,
+      spriteSheet: ProductionBuilding.SPRITE_SHEET,
       x,
       y,
-      width: ProductionBuilding.WIDTH,
-      height: ProductionBuilding.HEIGHT,
       anchor: { x: 0.5, y: 0.5 },
       onDown: function (evt: MouseEvent) {
         if (evt.button !== 0) return;

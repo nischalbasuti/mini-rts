@@ -16,6 +16,7 @@ import { assignGroupDestinations, findAdjacentWalkableCells, assignClosestCells 
 
 import swordsmanSpriteSheetPath from "./assets/swordsman.png";
 import villagerSpriteSheetPath from "./assets/villager.png";
+import castleSpriteSheetPath from "./assets/castle.png";
 
 let { canvas } = init();
 
@@ -504,7 +505,7 @@ function main() {
   }
 }
 
-load(swordsmanSpriteSheetPath, villagerSpriteSheetPath).then(() => {
+load(swordsmanSpriteSheetPath, villagerSpriteSheetPath, castleSpriteSheetPath).then(() => {
   let swordsmanImage = new Image();
   swordsmanImage.src = swordsmanSpriteSheetPath;
   swordsmanImage.onload = function () {
@@ -559,8 +560,18 @@ load(swordsmanSpriteSheetPath, villagerSpriteSheetPath).then(() => {
         },
       },
     });
+  };
 
-  main();
+  let castleImage = new Image();
+  castleImage.src = castleSpriteSheetPath;
+  castleImage.onload = function () {
+    ProductionBuilding.SPRITE_SHEET = SpriteSheet({
+      image: castleImage,
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+
+    main();
   };
 
 });
