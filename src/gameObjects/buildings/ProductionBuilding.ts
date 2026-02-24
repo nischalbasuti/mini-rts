@@ -17,13 +17,17 @@ export class ProductionBuilding {
 
   isSelected: boolean = false;
 
+  static AnimationStates = {
+    idle: "idle",
+  } as const;
+
   constructor(player: Player, x: number, y: number) {
     this.player = player;
     this.currentHp = this.baseHp;
 
     const self = this;
     this.gameObject = Sprite({
-      spriteSheet: ProductionBuilding.SPRITE_SHEET,
+      animations: ProductionBuilding.SPRITE_SHEET.animations,
       x,
       y,
       anchor: { x: 0.5, y: 0.5 },
@@ -45,6 +49,8 @@ export class ProductionBuilding {
       height: 5,
       anchor: { x: 0.5, y: 0.5 },
     });
+
+    this.gameObject.playAnimation(ProductionBuilding.AnimationStates.idle);
 
     track(this.gameObject);
   }

@@ -569,6 +569,12 @@ load(swordsmanSpriteSheetPath, villagerSpriteSheetPath, castleSpriteSheetPath).t
       image: castleImage,
       frameWidth: 64,
       frameHeight: 64,
+      animations: {
+        idle: {
+          frames: [0],
+          frameRate: 1,
+        },
+      },
     });
 
     main();
