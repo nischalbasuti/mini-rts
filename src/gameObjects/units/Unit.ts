@@ -3,6 +3,7 @@ import { Player } from "../../Player";
 import { CELL_SIZE, GridPoint, gridToPixel, pixelToGrid } from "../../pathing/Grid";
 import { GameState } from "../../GameState";
 import { UnitAction, Attackable } from "./UnitAction";
+import { findPath } from "../../pathing/AStar";
 
 export abstract class Unit {
   baseHp: number;
@@ -23,6 +24,7 @@ export abstract class Unit {
   } as const;
 
   static ACTION_TICK_INTERVAL = 60;
+  static REPATH_INTERVAL = 30; // frames between re-path attempts while chasing
 
   private _isSelected: boolean = false;
   get isSelected() {
@@ -52,6 +54,7 @@ export abstract class Unit {
 
   currentAction: UnitAction | null = null;
   protected _actionTickTimer: number = 0;
+  private _rePathTimer: number = 0;
 
   canGather(): boolean {
     return false;
@@ -92,6 +95,7 @@ export abstract class Unit {
   public setAction(action: UnitAction, path?: GridPoint[]) {
     this.currentAction = action;
     this._actionTickTimer = 0;
+    this._rePathTimer = 0;
     if (path) {
       this.setPath(path);
     }
@@ -150,7 +154,20 @@ export abstract class Unit {
     }
 
     if (!this.isTargetInRange(target.gameObject)) {
-      this.currentAction = null;
+      // Target moved — try to re-path toward it
+      this._rePathTimer++;
+      if (this._rePathTimer >= Unit.REPATH_INTERVAL) {
+        this._rePathTimer = 0;
+        const grid = GameState.getInstance().grid;
+        const from = pixelToGrid(this.gameObject.x, this.gameObject.y);
+        const to = pixelToGrid(target.gameObject.x, target.gameObject.y);
+        const path = findPath(grid, from, to);
+        if (path && path.length > 0) {
+          this.setPath(path); // keeps currentAction alive, reserves new destination
+        } else {
+          this.currentAction = null; // truly unreachable, give up
+        }
+      }
       return;
     }
 
