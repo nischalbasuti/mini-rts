@@ -4,6 +4,8 @@ import { Unit } from "./Unit";
 import { GameState } from "../../GameState";
 import { TreeResource } from "../resources/TreeResource";
 import { GoldResource } from "../resources/GoldResource";
+import { pixelToGrid, CELL_SIZE } from "../../pathing/Grid";
+import { findPath } from "../../pathing/AStar";
 
 export class VillagerUnit extends Unit {
   static WIDTH = 32;
@@ -57,11 +59,66 @@ export class VillagerUnit extends Unit {
     return true;
   }
 
+  private findNextResource(
+    depletedResource: TreeResource | GoldResource,
+  ): TreeResource | GoldResource | null {
+    const gameState = GameState.getInstance();
+    const resourceList =
+      depletedResource instanceof TreeResource ? gameState.trees : gameState.gold;
+
+    // Filter resources with remaining quantity within 2 tiles (2 * CELL_SIZE = 128 pixels)
+    const maxDistance = 2 * CELL_SIZE;
+    const candidates = resourceList.filter(
+      (res) => res.currentQuantity > 0 && res !== depletedResource,
+    );
+
+    if (candidates.length === 0) return null;
+
+    // Find closest by Euclidean distance
+    let closest = candidates[0];
+    let closestDistance = Math.hypot(
+      closest.gameObject.x - this.gameObject.x,
+      closest.gameObject.y - this.gameObject.y,
+    );
+
+    for (const res of candidates) {
+      const distance = Math.hypot(
+        res.gameObject.x - this.gameObject.x,
+        res.gameObject.y - this.gameObject.y,
+      );
+      if (distance < closestDistance && distance <= maxDistance) {
+        closest = res;
+        closestDistance = distance;
+      }
+    }
+
+    // Check if closest is within 2 tiles
+    if (closestDistance <= maxDistance) {
+      return closest;
+    }
+
+    return null;
+  }
+
   protected executeGather(target: TreeResource | GoldResource) {
     this.faceTarget(target.gameObject);
 
     if (target.currentQuantity <= 0) {
-      this.currentAction = null;
+      // Resource depleted — find next closest resource of same type within 2 tiles
+      const nextResource = this.findNextResource(target);
+      if (nextResource) {
+        const grid = GameState.getInstance().grid;
+        const from = pixelToGrid(this.gameObject.x, this.gameObject.y);
+        const to = pixelToGrid(nextResource.gameObject.x, nextResource.gameObject.y);
+        const path = findPath(grid, from, to);
+        if (path && path.length > 0) {
+          this.setAction({ type: "gather", target: nextResource }, path);
+        } else {
+          this.currentAction = null;
+        }
+      } else {
+        this.currentAction = null;
+      }
       return;
     }
 
