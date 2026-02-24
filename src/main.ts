@@ -41,6 +41,7 @@ function main() {
     (GRID_COLS - 2) * CELL_SIZE,
     (GRID_ROWS - 2) * CELL_SIZE,
   );
+  player1Building.wayPoint.position.set({x: 600, y: 550})
   spawnUnitFromBuilding(player1Building, player1, VillagerUnit);
   spawnUnitFromBuilding(player1Building, player1, InfantryUnit);
 
@@ -51,6 +52,7 @@ function main() {
     2 * CELL_SIZE,
     2 * CELL_SIZE,
   );
+  player2Building.wayPoint.position.set({x: 230, y: 70})
   spawnUnitFromBuilding(player2Building, player2, InfantryUnit);
   spawnUnitFromBuilding(player2Building, player2, VillagerUnit);
 
