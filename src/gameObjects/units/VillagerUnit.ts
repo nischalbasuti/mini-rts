@@ -66,8 +66,8 @@ export class VillagerUnit extends Unit {
     const resourceList =
       depletedResource instanceof TreeResource ? gameState.trees : gameState.gold;
 
-    // Filter resources with remaining quantity within 2 tiles (2 * CELL_SIZE = 128 pixels)
-    const maxDistance = 2 * CELL_SIZE;
+    // Filter resources with remaining quantity within 3 tiles (3 * CELL_SIZE = 128 pixels)
+    const maxDistance = 3 * CELL_SIZE;
     const candidates = resourceList.filter(
       (res) => res.currentQuantity > 0 && res !== depletedResource,
     );
