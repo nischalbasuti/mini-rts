@@ -30,15 +30,15 @@ export class Renderer {
     if (this.gameState.debugMode) {
       this.renderDebugOverlay();
     }
+
+    this.renderGridLines();
+    this.renderUnitDebug();
   }
 
-  private renderDebugOverlay() {
+  private renderGridLines() {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
-    const grid = this.gameState.grid;
-
-    // Grid lines
     ctx.strokeStyle = "rgba(200,200,200,0.4)";
     ctx.lineWidth = 1;
     for (let col = 0; col <= GRID_COLS; col++) {
@@ -55,27 +55,11 @@ export class Renderer {
       ctx.lineTo(GRID_COLS * CELL_SIZE, y);
       ctx.stroke();
     }
+  }
 
-    // Unwalkable cells (red tint)
-    for (let row = 0; row < GRID_ROWS; row++) {
-      for (let col = 0; col < GRID_COLS; col++) {
-        const cell = grid.getCell(col, row);
-        if (cell && !cell.walkable) {
-          ctx.fillStyle = "rgba(255,0,0,0.25)";
-          ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        }
-      }
-    }
-
-    // Reserved cells (yellow tint)
-    const reserved = grid.getReservedCells();
-    for (const key of reserved.keys()) {
-      const [colStr, rowStr] = key.split(",");
-      const col = parseInt(colStr);
-      const row = parseInt(rowStr);
-      ctx.fillStyle = "rgba(255,255,0,0.3)";
-      ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-    }
+  private renderUnitDebug() {
+    const ctx = this.gameState.canvas.getContext("2d");
+    if (!ctx) return;
 
     // Unit path queues and action state
     for (let pi = 0; pi < this.gameState.players.length; pi++) {
@@ -164,5 +148,34 @@ export class Renderer {
         }
       }
     }
+  }
+
+  private renderDebugOverlay() {
+    const ctx = this.gameState.canvas.getContext("2d");
+    if (!ctx) return;
+
+    const grid = this.gameState.grid;
+
+    // Unwalkable cells (red tint)
+    for (let row = 0; row < GRID_ROWS; row++) {
+      for (let col = 0; col < GRID_COLS; col++) {
+        const cell = grid.getCell(col, row);
+        if (cell && !cell.walkable) {
+          ctx.fillStyle = "rgba(255,0,0,0.25)";
+          ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+      }
+    }
+
+    // Reserved cells (yellow tint)
+    const reserved = grid.getReservedCells();
+    for (const key of reserved.keys()) {
+      const [colStr, rowStr] = key.split(",");
+      const col = parseInt(colStr);
+      const row = parseInt(rowStr);
+      ctx.fillStyle = "rgba(255,255,0,0.3)";
+      ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    }
+
   }
 }
