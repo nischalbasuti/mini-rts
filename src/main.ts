@@ -158,6 +158,18 @@ function main() {
     console.log("Creating Archer");
   });
 
+  function entityAtPoint<T extends { gameObject: { x: number; y: number; width: number; height: number; radius: number } }>(entities: T[], x: number, y: number): T | null {
+    for (const entity of entities) {
+      const go = entity.gameObject;
+      const hw = (go.width || go.radius * 2) / 2;
+      const hh = (go.height || go.radius * 2) / 2;
+      if (x >= go.x - hw && x <= go.x + hw && y >= go.y - hh && y <= go.y + hh) {
+        return entity;
+      }
+    }
+    return null;
+  }
+
   const LEFT_MOUSE_BUTTON = 0;
   const RIGHT_MOUSE_BUTTON = 2;
 
@@ -219,15 +231,44 @@ function main() {
       const selectionBox = SelectionBox.getInstance();
 
       const units = gameState.players.flatMap((player: Player) => player.units);
+      const isClick = Math.abs(currentX - startX) <= 5 && Math.abs(currentY - startY) <= 5;
 
-      for (const unit of units) {
-        if (selectionBox.isIntersecting(unit)) {
-          gameState.select(unit);
-          unit.isSelected = true;
+      if (isClick) {
+        // Click (not drag): clear selection if clicking blank space
+        const buildings = gameState.players.flatMap((player: Player) => player.buildings);
+        if (!entityAtPoint(units, currentX, currentY) && !entityAtPoint(buildings, currentX, currentY)) {
+          gameState.clearSelection();
+        }
+      } else {
+        // Drag: marquee select
+        for (const unit of units) {
+          if (selectionBox.isIntersecting(unit)) {
+            gameState.select(unit);
+            unit.isSelected = true;
+          }
         }
       }
 
       selectionBox.dispose();
+    }
+  });
+
+  canvas.addEventListener("dblclick", (event) => {
+    const bb = canvas.getBoundingClientRect();
+    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width);
+    const y = Math.floor(((event.clientY - bb.top) / bb.height) * canvas.height);
+
+    const allUnits = gameState.players.flatMap((player: Player) => player.units);
+    const clicked = entityAtPoint(allUnits, x, y);
+    if (!clicked) return;
+
+    gameState.clearSelection();
+    const sameTypeUnits = clicked.player.units.filter(
+      (u) => u.constructor === clicked.constructor
+    );
+    for (const unit of sameTypeUnits) {
+      gameState.select(unit);
+      unit.isSelected = true;
     }
   });
 
