@@ -22,9 +22,7 @@ export class Renderer {
         building.render();
       }
 
-      for (let unit of player.units) {
-        unit.render();
-      }
+      this.renderUnits(player);
     }
 
     if (this.gameState.debugMode) {
@@ -32,7 +30,6 @@ export class Renderer {
     }
 
     this.renderGridLines();
-    this.renderUnitDebug();
   }
 
   private renderGridLines() {
@@ -57,95 +54,95 @@ export class Renderer {
     }
   }
 
-  private renderUnitDebug() {
+  private renderUnits(player: typeof this.gameState.players[0]) {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
-    // Unit path queues and action state
-    for (let pi = 0; pi < this.gameState.players.length; pi++) {
-      const player = this.gameState.players[pi];
-      const color = pi === 0 ? "rgba(0,100,255,0.8)" : "rgba(255,50,50,0.8)";
+    const playerIndex = this.gameState.players.indexOf(player);
+    const color = playerIndex === 0 ? "rgba(0,100,255,0.8)" : "rgba(255,50,50,0.8)";
 
-      for (const unit of player.units) {
-        // Draw path queue
-        const queue = unit.pathQueue;
-        if (queue.length > 0) {
-          ctx.strokeStyle = color;
-          ctx.fillStyle = color;
-          ctx.lineWidth = 2;
+    for (const unit of player.units) {
+      // Render unit sprite and selection ring
+      unit.render();
 
-          // Draw line from unit position through path points
-          ctx.beginPath();
-          ctx.moveTo(unit.gameObject.x, unit.gameObject.y);
+      // Draw path queue
+      const queue = unit.pathQueue;
+      if (queue.length > 0) {
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2;
 
-          // Line to current waypoint
-          ctx.lineTo(unit.wayPoint.x, unit.wayPoint.y);
+        // Draw line from unit position through path points
+        ctx.beginPath();
+        ctx.moveTo(unit.gameObject.x, unit.gameObject.y);
 
-          // Lines through remaining queue
-          for (const point of queue) {
-            const pixel = gridToPixel(point.col, point.row);
-            ctx.lineTo(pixel.x, pixel.y);
-          }
-          ctx.stroke();
+        // Line to current waypoint
+        ctx.lineTo(unit.wayPoint.x, unit.wayPoint.y);
 
-          // Dots at each path point
-          for (const point of queue) {
-            const pixel = gridToPixel(point.col, point.row);
-            ctx.beginPath();
-            ctx.arc(pixel.x, pixel.y, 3, 0, Math.PI * 2);
-            ctx.fill();
-          }
+        // Lines through remaining queue
+        for (const point of queue) {
+          const pixel = gridToPixel(point.col, point.row);
+          ctx.lineTo(pixel.x, pixel.y);
         }
+        ctx.stroke();
 
-        // Draw action state label and vector to target
-        const action = unit.currentAction;
-        if (action && (action.type === "attack" || action.type === "gather")) {
-          const target = action.target;
-          const ux = unit.gameObject.x;
-          const uy = unit.gameObject.y;
-          const tx = target.gameObject.x;
-          const ty = target.gameObject.y;
-
-          // Vector line from unit to target
-          const actionColor = action.type === "attack" ? "rgba(255,0,0,0.8)" : "rgba(0,200,0,0.8)";
-          ctx.strokeStyle = actionColor;
-          ctx.lineWidth = 2;
-          ctx.setLineDash([4, 4]);
+        // Dots at each path point
+        for (const point of queue) {
+          const pixel = gridToPixel(point.col, point.row);
           ctx.beginPath();
-          ctx.moveTo(ux, uy);
-          ctx.lineTo(tx, ty);
-          ctx.stroke();
-          ctx.setLineDash([]);
+          ctx.arc(pixel.x, pixel.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
 
-          // Arrowhead at target end
-          const dx = tx - ux;
-          const dy = ty - uy;
-          const dist = Math.hypot(dx, dy);
-          if (dist > 0) {
-            const ndx = dx / dist;
-            const ndy = dy / dist;
-            const arrowLen = 8;
-            ctx.fillStyle = actionColor;
-            ctx.beginPath();
-            ctx.moveTo(tx, ty);
-            ctx.lineTo(tx - arrowLen * ndx - arrowLen * 0.5 * ndy, ty - arrowLen * ndy + arrowLen * 0.5 * ndx);
-            ctx.lineTo(tx - arrowLen * ndx + arrowLen * 0.5 * ndy, ty - arrowLen * ndy - arrowLen * 0.5 * ndx);
-            ctx.closePath();
-            ctx.fill();
-          }
+      // Draw action state label and vector to target
+      const action = unit.currentAction;
+      if (action && (action.type === "attack" || action.type === "gather")) {
+        const target = action.target;
+        const ux = unit.gameObject.x;
+        const uy = unit.gameObject.y;
+        const tx = target.gameObject.x;
+        const ty = target.gameObject.y;
 
-          // Action state label above unit
-          const label = action.type === "attack" ? "ATK" : "GTH";
-          ctx.font = "bold 10px monospace";
+        // Vector line from unit to target
+        const actionColor = action.type === "attack" ? "rgba(255,0,0,0.8)" : "rgba(0,200,0,0.8)";
+        ctx.strokeStyle = actionColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(ux, uy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Arrowhead at target end
+        const dx = tx - ux;
+        const dy = ty - uy;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0) {
+          const ndx = dx / dist;
+          const ndy = dy / dist;
+          const arrowLen = 8;
           ctx.fillStyle = actionColor;
-          ctx.textAlign = "center";
-          ctx.fillText(label, ux, uy - unit.gameObject.height / 2 - 4);
-        } else if (action && action.type === "move") {
-          ctx.font = "bold 10px monospace";
-          ctx.fillStyle = "rgba(255,255,255,0.8)";
-          ctx.textAlign = "center";
-          ctx.fillText("MOV", unit.gameObject.x, unit.gameObject.y - unit.gameObject.height / 2 - 4);
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.lineTo(tx - arrowLen * ndx - arrowLen * 0.5 * ndy, ty - arrowLen * ndy + arrowLen * 0.5 * ndx);
+          ctx.lineTo(tx - arrowLen * ndx + arrowLen * 0.5 * ndy, ty - arrowLen * ndy - arrowLen * 0.5 * ndx);
+          ctx.closePath();
+          ctx.fill();
         }
+
+        // Action state label above unit
+        const label = action.type === "attack" ? "ATK" : "GTH";
+        ctx.font = "bold 10px monospace";
+        ctx.fillStyle = actionColor;
+        ctx.textAlign = "center";
+        ctx.fillText(label, ux, uy - unit.gameObject.height / 2 - 4);
+      } else if (action && action.type === "move") {
+        ctx.font = "bold 10px monospace";
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.textAlign = "center";
+        ctx.fillText("MOV", unit.gameObject.x, unit.gameObject.y - unit.gameObject.height / 2 - 4);
       }
     }
   }
