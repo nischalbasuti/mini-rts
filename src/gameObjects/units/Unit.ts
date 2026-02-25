@@ -176,7 +176,25 @@ export abstract class Unit {
     this._actionTickTimer++;
     if (this._actionTickTimer >= Unit.ACTION_TICK_INTERVAL) {
       this._actionTickTimer = 0;
-      target.currentHp -= this.baseAttack;
+      // Deal damage and track this as the attacker for counter-attacks
+      if (target instanceof Unit) {
+        target.onTakeDamage(this, this.baseAttack);
+      } else {
+        target.currentHp -= this.baseAttack;
+      }
+    }
+  }
+
+  protected onTakeDamage(attacker: Unit, damage: number) {
+    this.currentHp -= damage;
+
+    // Counter-attack if not already attacking and attacker is in range
+    if (
+      this.baseAttack > 0 &&
+      (!this.currentAction || this.currentAction.type !== "attack") &&
+      this.isTargetInRange(attacker.gameObject)
+    ) {
+      this.currentAction = { type: "attack", target: attacker };
     }
   }
 
