@@ -59,16 +59,12 @@ export function findPath(grid: Grid, start: GridPoint, goal: GridPoint): GridPoi
     actualGoal = nearest;
   }
 
-  // If start is unwalkable, find nearest walkable
-  let actualStart = start;
-  if (!grid.isWalkable(start.col, start.row)) {
-    const nearest = findNearestWalkable(grid, start);
-    if (!nearest) return null;
-    actualStart = nearest;
-  }
+  // Start is always valid — the unit IS at this cell and will leave it.
+  // Treat it as walkable so corner-cutting checks don't block adjacent cells.
+  const startWalkable = new Set([key(start.col, start.row)]);
 
   // Already at goal
-  if (actualStart.col === actualGoal.col && actualStart.row === actualGoal.row) {
+  if (start.col === actualGoal.col && start.row === actualGoal.row) {
     return [actualGoal];
   }
 
@@ -76,10 +72,10 @@ export function findPath(grid: Grid, start: GridPoint, goal: GridPoint): GridPoi
   const closedSet = new Set<string>();
 
   const startNode: AStarNode = {
-    col: actualStart.col,
-    row: actualStart.row,
+    col: start.col,
+    row: start.row,
     g: 0,
-    f: heuristic(actualStart, actualGoal),
+    f: heuristic(start, actualGoal),
     parent: null,
   };
 
@@ -114,7 +110,7 @@ export function findPath(grid: Grid, start: GridPoint, goal: GridPoint): GridPoi
     if (closedSet.has(currentKey)) continue;
     closedSet.add(currentKey);
 
-    const neighbors = grid.getNeighbors(current.col, current.row);
+    const neighbors = grid.getNeighbors(current.col, current.row, startWalkable);
     for (const neighbor of neighbors) {
       const nKey = key(neighbor.col, neighbor.row);
       if (closedSet.has(nKey)) continue;

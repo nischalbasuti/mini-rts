@@ -144,7 +144,12 @@ export class Grid {
     return this.reservedCells;
   }
 
-  getNeighbors(col: number, row: number): GridPoint[] {
+  getNeighbors(col: number, row: number, extraWalkable?: Set<string>): GridPoint[] {
+    const walkable = (c: number, r: number): boolean => {
+      if (extraWalkable?.has(`${c},${r}`)) return this.isInBounds(c, r);
+      return this.isWalkable(c, r);
+    };
+
     const neighbors: GridPoint[] = [];
 
     // Cardinal directions
@@ -154,7 +159,7 @@ export class Grid {
     for (const [dc, dr] of cardinals) {
       const nc = col + dc;
       const nr = row + dr;
-      if (this.isWalkable(nc, nr)) {
+      if (walkable(nc, nr)) {
         neighbors.push({ col: nc, row: nr });
       }
     }
@@ -171,9 +176,9 @@ export class Grid {
       const nc = col + dc;
       const nr = row + dr;
       if (
-        this.isWalkable(nc, nr) &&
-        this.isWalkable(col + ac1, row + ar1) &&
-        this.isWalkable(col + ac2, row + ar2)
+        walkable(nc, nr) &&
+        walkable(col + ac1, row + ar1) &&
+        walkable(col + ac2, row + ar2)
       ) {
         neighbors.push({ col: nc, row: nr });
       }
