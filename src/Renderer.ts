@@ -1,5 +1,7 @@
+import { Unit } from "./gameObjects/units/Unit";
 import { GameState } from "./GameState";
 import { CELL_SIZE, GRID_COLS, GRID_ROWS, gridToPixel } from "./pathing/Grid";
+import { Player } from "./Player";
 
 export class Renderer {
   readonly gameState: GameState;
@@ -54,18 +56,25 @@ export class Renderer {
     }
   }
 
-  private renderUnits(player: typeof this.gameState.players[0]) {
+  private renderUnits(player: Player) {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
     const playerIndex = this.gameState.players.indexOf(player);
-    const color = playerIndex === 0 ? "rgba(0,100,255,0.8)" : "rgba(255,50,50,0.8)";
+    const playerColor = playerIndex === 0 ? "rgba(0,100,255,0.8)" : "rgba(255,50,50,0.8)";
 
     for (const unit of player.units) {
       // Render unit sprite and selection ring
       unit.render();
 
-      // Draw path queue
+      if (unit.isSelected || this.gameState.debugMode) {
+        this.renderActionState(unit, ctx);
+        this.renderPathQueue(unit, ctx, playerColor);
+      }
+    }
+  }
+
+  private renderPathQueue(unit: Unit, ctx: CanvasRenderingContext2D, color: string) {
       const queue = unit.pathQueue;
       if (queue.length > 0) {
         ctx.strokeStyle = color;
@@ -94,56 +103,57 @@ export class Renderer {
           ctx.fill();
         }
       }
+  }
 
-      // Draw action state label and vector to target
-      const action = unit.currentAction;
-      if (action && (action.type === "attack" || action.type === "gather")) {
-        const target = action.target;
-        const ux = unit.gameObject.x;
-        const uy = unit.gameObject.y;
-        const tx = target.gameObject.x;
-        const ty = target.gameObject.y;
+  private renderActionState(unit: Unit, ctx: CanvasRenderingContext2D) {
+    // Draw action state label and vector to target
+    const action = unit.currentAction;
+    if (action && (action.type === "attack" || action.type === "gather")) {
+      const target = action.target;
+      const ux = unit.gameObject.x;
+      const uy = unit.gameObject.y;
+      const tx = target.gameObject.x;
+      const ty = target.gameObject.y;
 
-        // Vector line from unit to target
-        const actionColor = action.type === "attack" ? "rgba(255,0,0,0.8)" : "rgba(0,200,0,0.8)";
-        ctx.strokeStyle = actionColor;
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(ux, uy);
-        ctx.lineTo(tx, ty);
-        ctx.stroke();
-        ctx.setLineDash([]);
+      // Vector line from unit to target
+      const actionColor = action.type === "attack" ? "rgba(255,0,0,0.8)" : "rgba(0,200,0,0.8)";
+      ctx.strokeStyle = actionColor;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(ux, uy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.setLineDash([]);
 
-        // Arrowhead at target end
-        const dx = tx - ux;
-        const dy = ty - uy;
-        const dist = Math.hypot(dx, dy);
-        if (dist > 0) {
-          const ndx = dx / dist;
-          const ndy = dy / dist;
-          const arrowLen = 8;
-          ctx.fillStyle = actionColor;
-          ctx.beginPath();
-          ctx.moveTo(tx, ty);
-          ctx.lineTo(tx - arrowLen * ndx - arrowLen * 0.5 * ndy, ty - arrowLen * ndy + arrowLen * 0.5 * ndx);
-          ctx.lineTo(tx - arrowLen * ndx + arrowLen * 0.5 * ndy, ty - arrowLen * ndy - arrowLen * 0.5 * ndx);
-          ctx.closePath();
-          ctx.fill();
-        }
-
-        // Action state label above unit
-        const label = action.type === "attack" ? "ATK" : "GTH";
-        ctx.font = "bold 10px monospace";
+      // Arrowhead at target end
+      const dx = tx - ux;
+      const dy = ty - uy;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0) {
+        const ndx = dx / dist;
+        const ndy = dy / dist;
+        const arrowLen = 8;
         ctx.fillStyle = actionColor;
-        ctx.textAlign = "center";
-        ctx.fillText(label, ux, uy - unit.gameObject.height / 2 - 4);
-      } else if (action && action.type === "move") {
-        ctx.font = "bold 10px monospace";
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
-        ctx.textAlign = "center";
-        ctx.fillText("MOV", unit.gameObject.x, unit.gameObject.y - unit.gameObject.height / 2 - 4);
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(tx - arrowLen * ndx - arrowLen * 0.5 * ndy, ty - arrowLen * ndy + arrowLen * 0.5 * ndx);
+        ctx.lineTo(tx - arrowLen * ndx + arrowLen * 0.5 * ndy, ty - arrowLen * ndy - arrowLen * 0.5 * ndx);
+        ctx.closePath();
+        ctx.fill();
       }
+
+      // Action state label above unit
+      const label = action.type === "attack" ? "ATK" : "GTH";
+      ctx.font = "bold 10px monospace";
+      ctx.fillStyle = actionColor;
+      ctx.textAlign = "center";
+      ctx.fillText(label, ux, uy - unit.gameObject.height / 2 - 4);
+    } else if (action && action.type === "move") {
+      ctx.font = "bold 10px monospace";
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.textAlign = "center";
+      ctx.fillText("MOV", unit.gameObject.x, unit.gameObject.y - unit.gameObject.height / 2 - 4);
     }
   }
 
