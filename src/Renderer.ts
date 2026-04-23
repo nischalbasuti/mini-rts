@@ -26,14 +26,12 @@ export class Renderer {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
-    const width = this.gameState.canvas.width;
-    const height = this.gameState.canvas.height;
-
-    // Clear canvas before rendering
-    ctx.clearRect(0, 0, width, height);
-
     // Apply zoom and offset in a single transform
-    ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offsetX, -this.offsetY);
+    ctx.translate(-this.offsetX, -this.offsetY);
+    ctx.scale(this.zoom, this.zoom);
+
+    // Clear the entire canvas viewport
+    ctx.clearRect(0, 0, this.gameState.canvas.width / this.zoom, this.gameState.canvas.height / this.zoom);
 
     for (let tree of this.gameState.trees) {
       tree.gameObject.render();
