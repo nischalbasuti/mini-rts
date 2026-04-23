@@ -13,6 +13,32 @@ export class Renderer {
     this.gameState = gameState;
   }
 
+
+  /**
+   * Convert viewport (screen) coordinates to world coordinates.
+   * @param viewportX - X position in screen/viewport space
+   * @param viewportY - Y position in screen/viewport space
+   * @returns Object with worldX and worldY in world coordinates
+   */
+  viewportToWorld(viewportX: number, viewportY: number): { worldX: number; worldY: number } {
+    return {
+      worldX: (viewportX + this.offsetX) / this.zoom,
+      worldY: (viewportY + this.offsetY) / this.zoom,
+    };
+  }
+
+  /**
+   * Convert world coordinates to viewport (screen) coordinates.
+   * @param worldX - X position in world space
+   * @param worldY - Y position in world space
+   * @returns Object with viewportX and viewportY in screen coordinates
+   */
+  worldToViewport(worldX: number, worldY: number): { viewportX: number; viewportY: number } {
+    return {
+      viewportX: worldX * this.zoom - this.offsetX,
+      viewportY: worldY * this.zoom - this.offsetY,
+    };
+  }
   applyZoom(z: number) {
     this.zoom = z;
   }
@@ -30,7 +56,7 @@ export class Renderer {
     ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offsetX, -this.offsetY);
 
     // Clear the viewport in world coordinates
-    ctx.clearRect(0, 0, this.gameState.canvas.width / this.zoom, this.gameState.canvas.height / this.zoom);
+    ctx.clearRect(-this.gameState.canvas.width/2/this.zoom, -this.gameState.canvas.height/2/this.zoom, this.gameState.canvas.width * 2 / this.zoom, this.gameState.canvas.height * 2 / this.zoom);
 
     for (let tree of this.gameState.trees) {
       tree.gameObject.render();
