@@ -66,6 +66,14 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+/**
+ * Handle window resize to keep canvas dimensions updated.
+ */
+window.addEventListener("resize", () => {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+});
+
 declare global {
   interface Window {
     gameState: GameState;
