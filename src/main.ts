@@ -1,4 +1,4 @@
-import { load, Sprite, SpriteSheet, init, GameLoop } from "kontra";
+import { initPointer, load, Sprite, SpriteSheet, init, GameLoop } from "kontra";
 import { GameState } from "./GameState";
 import { Player } from "./Player";
 import { InfantryUnit } from "./gameObjects/units/InfantryUnit";
@@ -38,6 +38,8 @@ canvas.addEventListener("wheel", (event) => {
 }, {
   passive: false,
 });
+
+initPointer();
 
 /**
  * Camera offset for panning.
