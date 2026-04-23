@@ -24,6 +24,21 @@ const gameState = GameState.getInstance(canvas);
 const spawner = new Spawner(gameState);
 const renderer = new Renderer(gameState);
 
+// @ts-ignore
+window.renderer = renderer;
+
+/**
+ * Handle scroll wheel for zoom.
+ */
+canvas.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  let zoomDelta = event.deltaY * 0.001;
+  let zoom = Math.max(0.25, Math.min(4, renderer.zoom - zoomDelta));
+  renderer.applyZoom(zoom);
+}, {
+  passive: false,
+});
+
 initPointer();
 
 declare global {
@@ -33,6 +48,9 @@ declare global {
 }
 window.gameState = gameState;
 
+/**
+ * Initialize the game.
+ */
 function main() {
   const player1 = new Player("Player 1", "blue");
   gameState.players.push(player1);
@@ -96,7 +114,10 @@ function main() {
     },
     render: function () {
       renderer.render();
-      SelectionBox.getInstance().sprite.render();
+      const selectionBox = SelectionBox.getInstance();
+      if (selectionBox.rectangle) {
+        selectionBox.sprite.render();
+      }
       updateSelectionPanel();
       updateResourceDisplay();
     },
@@ -121,7 +142,10 @@ function main() {
     }
   });
 
-  function spawnUnitFromBuilding(
+  /**
+ * Spawn a unit from a production building and move it to the building's way point.
+ */
+function spawnUnitFromBuilding(
     building: ProductionBuilding,
     player: Player,
     unitType: typeof InfantryUnit | typeof VillagerUnit,
@@ -158,6 +182,9 @@ function main() {
     console.log("Creating Archer");
   });
 
+  /**
+   * Finds an entity at the given point.
+   */
   function entityAtPoint<T extends { gameObject: { x: number; y: number; width: number; height: number; radius: number } }>(entities: T[], x: number, y: number): T | null {
     for (const entity of entities) {
       const go = entity.gameObject;
@@ -187,9 +214,9 @@ function main() {
     event.preventDefault();
 
     const bb = canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width);
+    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom);
     const y = Math.floor(
-      ((event.clientY - bb.top) / bb.height) * canvas.height,
+      ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom,
     );
 
     if (event.button === LEFT_MOUSE_BUTTON) {
@@ -209,10 +236,10 @@ function main() {
     if (isDragging) {
       const bb = canvas.getBoundingClientRect();
       currentX = Math.floor(
-        ((event.clientX - bb.left) / bb.width) * canvas.width,
+        ((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom,
       );
       currentY = Math.floor(
-        ((event.clientY - bb.top) / bb.height) * canvas.height,
+        ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom,
       );
 
       if (Math.abs(currentX - startX) > 5 && Math.abs(currentY - startY) > 5) {
@@ -255,8 +282,8 @@ function main() {
 
   canvas.addEventListener("dblclick", (event) => {
     const bb = canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width);
-    const y = Math.floor(((event.clientY - bb.top) / bb.height) * canvas.height);
+    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / zoom);
+    const y = Math.floor(((event.clientY - bb.top) / bb.height) * canvas.height / zoom);
 
     const allUnits = gameState.players.flatMap((player: Player) => player.units);
     const clicked = entityAtPoint(allUnits, x, y);
@@ -411,6 +438,9 @@ function main() {
     selectionDetailsEl.innerHTML = `<b>${parts.join(", ")} selected</b>`;
   }
 
+  /**
+   * Handle right-click events for actions like deselect or movement cancel.
+   */
   function handleRightClick(x: number, y: number) {
     console.log("Right click", { x, y });
 
@@ -442,6 +472,9 @@ function main() {
     }
   }
 
+  /**
+   * Handle move click (drag/drop) to move selected units to a destination.
+   */
   function handleMoveClick(units: Unit[], x: number, y: number) {
     const grid = gameState.grid;
     const destinations = assignGroupDestinations(grid, x, y, units.length);
@@ -459,6 +492,9 @@ function main() {
     }
   }
 
+  /**
+   * Handle resource click (gathering or destroying).
+   */
   function handleResourceClick(units: Unit[], target: TreeResource | GoldResource) {
     const grid = gameState.grid;
     const go = target.gameObject;
@@ -492,6 +528,9 @@ function main() {
     }
   }
 
+  /**
+   * Handle enemy unit click (attack).
+   */
   function handleEnemyClick(units: Unit[], target: Unit) {
     const grid = gameState.grid;
     const targetCell = pixelToGrid(target.gameObject.x, target.gameObject.y);
@@ -520,6 +559,9 @@ function main() {
     }
   }
 
+  /**
+   * Handle enemy building click (attack).
+   */
   function handleEnemyBuildingClick(units: Unit[], target: ProductionBuilding) {
     const grid = gameState.grid;
     const go = target.gameObject;
@@ -548,6 +590,9 @@ function main() {
   }
 }
 
+/**
+ * Load sprite sheets and start the game loop.
+ */
 load(swordsmanSpriteSheetPath, villagerSpriteSheetPath, castleSpriteSheetPath).then(() => {
   let swordsmanImage = new Image();
   swordsmanImage.src = swordsmanSpriteSheetPath;

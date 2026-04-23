@@ -5,12 +5,22 @@ import { Player } from "./Player";
 
 export class Renderer {
   readonly gameState: GameState;
+  zoom: number = 1;
 
   constructor(gameState: GameState) {
     this.gameState = gameState;
   }
 
+  applyZoom(z: number) {
+    this.zoom = z;
+  }
+
   render() {
+    const ctx = this.gameState.canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.setTransform(this.zoom, 0, 0, this.zoom, 0, 0);
+
     for (let tree of this.gameState.trees) {
       tree.gameObject.render();
     }
