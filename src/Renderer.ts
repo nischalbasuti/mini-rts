@@ -26,11 +26,10 @@ export class Renderer {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
-    // Apply zoom and offset in a single transform
-    ctx.translate(-this.offsetX, -this.offsetY);
-    ctx.scale(this.zoom, this.zoom);
+    // Set transform: scale by zoom, translate by offset
+    ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offsetX, -this.offsetY);
 
-    // Clear the entire canvas viewport
+    // Clear the viewport in world coordinates
     ctx.clearRect(0, 0, this.gameState.canvas.width / this.zoom, this.gameState.canvas.height / this.zoom);
 
     for (let tree of this.gameState.trees) {
