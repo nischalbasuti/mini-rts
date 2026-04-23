@@ -26,6 +26,12 @@ export class Renderer {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
+    const width = this.gameState.canvas.width;
+    const height = this.gameState.canvas.height;
+
+    // Clear canvas before rendering
+    ctx.clearRect(0, 0, width, height);
+
     // Apply zoom and offset in a single transform
     ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offsetX, -this.offsetY);
 
