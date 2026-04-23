@@ -6,6 +6,8 @@ import { Player } from "./Player";
 export class Renderer {
   readonly gameState: GameState;
   zoom: number = 1;
+  offsetX: number = 0;
+  offsetY: number = 0;
 
   constructor(gameState: GameState) {
     this.gameState = gameState;
@@ -15,11 +17,17 @@ export class Renderer {
     this.zoom = z;
   }
 
+  applyOffset(x: number, y: number) {
+    this.offsetX = x;
+    this.offsetY = y;
+  }
+
   render() {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.setTransform(this.zoom, 0, 0, this.zoom, 0, 0);
+    // Apply zoom and offset in a single transform
+    ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offsetX, -this.offsetY);
 
     for (let tree of this.gameState.trees) {
       tree.gameObject.render();
