@@ -50,7 +50,7 @@ let offsetY = 0;
 /**
  * Handle arrow keys for camera panning.
  */
-canvas.addEventListener("keydown", (event) => {
+document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     offsetX -= 5 * renderer.zoom;
     renderer.applyOffset(offsetX, offsetY);
@@ -239,9 +239,9 @@ function spawnUnitFromBuilding(
     event.preventDefault();
 
     const bb = canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom - offsetX);
+    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom + offsetX);
     const y = Math.floor(
-      ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom - offsetY,
+      ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom + offsetY,
     );
 
     if (event.button === LEFT_MOUSE_BUTTON) {
@@ -261,10 +261,10 @@ function spawnUnitFromBuilding(
     if (isDragging) {
     const bb = canvas.getBoundingClientRect();
       currentX = Math.floor(
-        ((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom - offsetX,
+        ((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom + offsetX,
       );
       currentY = Math.floor(
-        ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom - offsetY,
+        ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom + offsetY,
       );
 
       if (Math.abs(currentX - startX) > 5 && Math.abs(currentY - startY) > 5) {
@@ -307,8 +307,8 @@ function spawnUnitFromBuilding(
 
   canvas.addEventListener("dblclick", (event) => {
     const bb = canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom - offsetX);
-    const y = Math.floor(((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom - offsetY);
+    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom + offsetX);
+    const y = Math.floor(((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom + offsetY);
 
     const allUnits = gameState.players.flatMap((player: Player) => player.units);
     const clicked = entityAtPoint(allUnits, x, y);
