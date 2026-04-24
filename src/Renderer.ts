@@ -52,11 +52,16 @@ export class Renderer {
     const ctx = this.gameState.canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set transform: scale by zoom, translate by offset
+    // Apply transform: scale by zoom, translate by offset
     ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offsetX, -this.offsetY);
 
-    // Clear the viewport in world coordinates
-    ctx.clearRect(-this.gameState.canvas.width/2/this.zoom, -this.gameState.canvas.height/2/this.zoom, this.gameState.canvas.width * 2 / this.zoom, this.gameState.canvas.height * 2 / this.zoom);
+    // Calculate clearRect parameters in world space
+    const { worldX: clearX, worldY: clearY } = this.viewportToWorld(0, 0); // Origin after transform
+    const viewportWidth = this.gameState.canvas.width / this.zoom;
+    const viewportHeight = this.gameState.canvas.height / this.zoom;
+    
+    // Clear the viewport in world space
+    ctx.clearRect(clearX, clearY, viewportWidth, viewportHeight);
 
     for (let tree of this.gameState.trees) {
       tree.gameObject.render();
