@@ -247,10 +247,9 @@ function spawnUnitFromBuilding(
     event.preventDefault();
 
     const bb = canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom + offsetX);
-    const y = Math.floor(
-      ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom + offsetY,
-    );
+    const viewportX = (event.clientX - bb.left) / bb.width * canvas.width;
+    const viewportY = (event.clientY - bb.top) / bb.height * canvas.height;
+    const { worldX: x, worldY: y } = renderer.viewportToWorld(viewportX, viewportY);
 
     if (event.button === LEFT_MOUSE_BUTTON) {
       isDragging = true;
@@ -267,13 +266,13 @@ function spawnUnitFromBuilding(
 
   canvas.addEventListener("mousemove", (event) => {
     if (isDragging) {
-    const bb = canvas.getBoundingClientRect();
-      currentX = Math.floor(
-        ((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom + offsetX,
-      );
-      currentY = Math.floor(
-        ((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom + offsetY,
-      );
+      const bb = canvas.getBoundingClientRect();
+      const viewportX = (event.clientX - bb.left) / bb.width * canvas.width;
+      const viewportY = (event.clientY - bb.top) / bb.height * canvas.height;
+      const { worldX: worldXPos, worldY: worldYPos } = renderer.viewportToWorld(viewportX, viewportY);
+
+      currentX = Math.floor(worldXPos);
+      currentY = Math.floor(worldYPos);
 
       if (Math.abs(currentX - startX) > 5 && Math.abs(currentY - startY) > 5) {
         gameState.clearSelection();
@@ -315,8 +314,9 @@ function spawnUnitFromBuilding(
 
   canvas.addEventListener("dblclick", (event) => {
     const bb = canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - bb.left) / bb.width) * canvas.width / renderer.zoom + offsetX);
-    const y = Math.floor(((event.clientY - bb.top) / bb.height) * canvas.height / renderer.zoom + offsetY);
+    const viewportX = (event.clientX - bb.left) / bb.width * canvas.width;
+    const viewportY = (event.clientY - bb.top) / bb.height * canvas.height;
+    const { worldX: x, worldY: y } = renderer.viewportToWorld(viewportX, viewportY);
 
     const allUnits = gameState.players.flatMap((player: Player) => player.units);
     const clicked = entityAtPoint(allUnits, x, y);
