@@ -28,13 +28,31 @@ const renderer = new Renderer(gameState);
 window.renderer = renderer;
 
 /**
- * Handle scroll wheel for zoom.
+ * Handle scroll wheel for zoom (zooms towards mouse).
  */
 canvas.addEventListener("wheel", (event) => {
   event.preventDefault();
-  let zoomDelta = event.deltaY * 0.001;
-  let zoom = Math.max(0.25, Math.min(4, renderer.zoom - zoomDelta));
-  renderer.applyZoom(zoom);
+  const zoomDelta = event.deltaY * 0.001;
+  const newZoom = Math.max(0.25, Math.min(4, renderer.zoom - zoomDelta));
+  
+  // Get mouse position in viewport coordinates and convert to world
+  const bb = canvas.getBoundingClientRect();
+  const viewportMouseX = (event.clientX - bb.left) / bb.width * canvas.width;
+  const viewportMouseY = (event.clientY - bb.top) / bb.height * canvas.height;
+  
+  // Current world position under mouse
+  const { worldX: mouseXBefore, worldY: mouseYBefore } = renderer.viewportToWorld(viewportMouseX, viewportMouseY);
+  
+  // Apply zoom change
+  renderer.applyZoom(newZoom);
+  
+  // Get mouse position in viewport again (after zoom)
+  const { worldX: mouseXAfter, worldY: mouseYAfter } = renderer.viewportToWorld(viewportMouseX, viewportMouseY);
+  
+  // Adjust offset to keep mouse world position stable
+  const offsetXDelta = mouseXBefore - mouseXAfter;
+  const offsetYDelta = mouseYBefore - mouseYAfter;
+  renderer.applyOffset(renderer.offsetX + offsetXDelta, renderer.offsetY + offsetYDelta);
 }, {
   passive: false,
 });
