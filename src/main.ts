@@ -33,7 +33,26 @@ window.renderer = renderer;
 canvas.addEventListener("wheel", (event) => {
   event.preventDefault();
   const zoomDelta = event.deltaY * 0.001;
-  const newZoom = Math.max(0.25, Math.min(4, renderer.zoom - zoomDelta));
+  let newZoom = renderer.zoom - zoomDelta;
+  
+  // Clamp to grid-cell zoom (min zoom = 1x grid cells)
+  if (newZoom < 1.0) {
+    // Zoom out to minimum
+    newZoom = 1.0;
+    // Calculate offset to ensure grid is fully visible and centered
+    const viewportWidth = canvas.width / newZoom;
+    const viewportHeight = canvas.height / newZoom;
+    const gridWidth = GRID_COLS * CELL_SIZE;
+    const gridHeight = GRID_ROWS * CELL_SIZE;
+    const offsetXDelta = (gridWidth - viewportWidth) / 2 - renderer.offsetX;
+    const offsetYDelta = (gridHeight - viewportHeight) / 2 - renderer.offsetY;
+    renderer.applyOffset(renderer.offsetX + offsetXDelta, renderer.offsetY + offsetYDelta);
+  } else if (newZoom > 4.0) {
+    // Zoom in to maximum
+    newZoom = 4.0;
+  }
+  
+  newZoom = Math.max(1.0, Math.min(4.0, newZoom));
   
   // Get mouse position in viewport coordinates and convert to world
   const bb = canvas.getBoundingClientRect();
