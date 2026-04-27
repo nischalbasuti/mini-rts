@@ -85,20 +85,31 @@ let offsetX = 0;
 let offsetY = 0;
 
 /**
- * Handle arrow keys for camera panning.
+ * Handle arrow keys for camera panning (clamped to keep grid in viewport).
  */
+const GRID_WIDTH = GRID_COLS * CELL_SIZE;
+const GRID_HEIGHT = GRID_ROWS * CELL_SIZE;
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
-    offsetX -= 5 * renderer.zoom;
+    const proposedX = offsetX - 5 * renderer.zoom;
+    const minX = -GRID_WIDTH + gameState.canvas.width / renderer.zoom;
+    offsetX = Math.max(minX, proposedX);
     renderer.applyOffset(offsetX, offsetY);
   } else if (event.key === "ArrowRight") {
-    offsetX += 5 * renderer.zoom;
+    const proposedX = offsetX + 5 * renderer.zoom;
+    const maxX = GRID_WIDTH - gameState.canvas.width / renderer.zoom;
+    offsetX = Math.min(maxX, proposedX);
     renderer.applyOffset(offsetX, offsetY);
   } else if (event.key === "ArrowUp") {
-    offsetY -= 5 * renderer.zoom;
+    const proposedY = offsetY - 5 * renderer.zoom;
+    const minY = -GRID_HEIGHT + gameState.canvas.height / renderer.zoom;
+    offsetY = Math.max(minY, proposedY);
     renderer.applyOffset(offsetX, offsetY);
   } else if (event.key === "ArrowDown") {
-    offsetY += 5 * renderer.zoom;
+    const proposedY = offsetY + 5 * renderer.zoom;
+    const maxY = GRID_HEIGHT - gameState.canvas.height / renderer.zoom;
+    offsetY = Math.min(maxY, proposedY);
     renderer.applyOffset(offsetX, offsetY);
   }
 });
