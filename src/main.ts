@@ -85,7 +85,7 @@ let offsetX = 0;
 let offsetY = 0;
 
 /**
- * Handle arrow keys for camera panning (clamped to keep grid in viewport).
+ * Handle arrow keys for camera panning (clamped to keep grid in viewport, accounting for zoom).
  */
 const GRID_WIDTH = GRID_COLS * CELL_SIZE;
 const GRID_HEIGHT = GRID_ROWS * CELL_SIZE;
@@ -93,22 +93,26 @@ const GRID_HEIGHT = GRID_ROWS * CELL_SIZE;
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     const proposedX = offsetX - 5 * renderer.zoom;
-    const minX = -GRID_WIDTH + gameState.canvas.width / renderer.zoom;
+    // Clamp: ensure left grid edge stays within viewport at current zoom
+    const minX = -GRID_WIDTH + (gameState.canvas.width / renderer.zoom) / 2;
     offsetX = Math.max(minX, proposedX);
     renderer.applyOffset(offsetX, offsetY);
   } else if (event.key === "ArrowRight") {
     const proposedX = offsetX + 5 * renderer.zoom;
-    const maxX = GRID_WIDTH - gameState.canvas.width / renderer.zoom;
+    // Clamp: ensure right grid edge stays within viewport at current zoom
+    const maxX = GRID_WIDTH - (gameState.canvas.width / renderer.zoom) / 2;
     offsetX = Math.min(maxX, proposedX);
     renderer.applyOffset(offsetX, offsetY);
   } else if (event.key === "ArrowUp") {
     const proposedY = offsetY - 5 * renderer.zoom;
-    const minY = -GRID_HEIGHT + gameState.canvas.height / renderer.zoom;
+    // Clamp: ensure top grid edge stays within viewport at current zoom
+    const minY = -GRID_HEIGHT + (gameState.canvas.height / renderer.zoom) / 2;
     offsetY = Math.max(minY, proposedY);
     renderer.applyOffset(offsetX, offsetY);
   } else if (event.key === "ArrowDown") {
     const proposedY = offsetY + 5 * renderer.zoom;
-    const maxY = GRID_HEIGHT - gameState.canvas.height / renderer.zoom;
+    // Clamp: ensure bottom grid edge stays within viewport at current zoom
+    const maxY = GRID_HEIGHT - (gameState.canvas.height / renderer.zoom) / 2;
     offsetY = Math.min(maxY, proposedY);
     renderer.applyOffset(offsetX, offsetY);
   }
