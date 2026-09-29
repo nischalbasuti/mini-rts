@@ -24,6 +24,21 @@ const gameState = GameState.getInstance(canvas);
 const spawner = new Spawner(gameState);
 const renderer = new Renderer(gameState);
 
+const repositoryUrl = "https://github.com/nischalbasuti/mini-rts";
+const buildTimeEl = document.getElementById("buildTime") as HTMLTimeElement;
+const buildCommitEl = document.getElementById("buildCommit") as HTMLAnchorElement;
+const buildTime = new Date(import.meta.env.VITE_BUILD_TIME);
+const gitCommit = import.meta.env.VITE_GIT_COMMIT || "local";
+
+buildTimeEl.dateTime = buildTime.toISOString();
+buildTimeEl.textContent = buildTime.toLocaleString();
+buildCommitEl.textContent = gitCommit === "local" ? gitCommit : gitCommit.slice(0, 7);
+if (gitCommit !== "local") {
+  buildCommitEl.href = `${repositoryUrl}/commit/${gitCommit}`;
+  buildCommitEl.target = "_blank";
+  buildCommitEl.rel = "noreferrer";
+}
+
 // @ts-ignore
 window.renderer = renderer;
 

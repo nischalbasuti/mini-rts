@@ -9,6 +9,11 @@
   <body>
     <div id="gameContainer">
       <h1>Mini-RTS</h1>
+      <div id="buildInfo">
+        Built <time id="buildTime"></time>
+        · Commit <a id="buildCommit"></a>
+        · <a href="https://github.com/nischalbasuti/mini-rts" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
 
       <canvas id="gameCanvas" width="800" height="600"></canvas>
 
@@ -64,7 +69,17 @@
 
     h1 {
       color: #fff;
-      margin-bottom: 10px;
+    }
+
+    #buildInfo {
+      margin-top: -6px;
+      color: #999;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    #buildInfo a {
+      color: #8ab4f8;
     }
 
     #gameCanvas {
