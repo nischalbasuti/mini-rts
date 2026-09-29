@@ -133,6 +133,23 @@ declare global {
 }
 window.gameState = gameState;
 
+type TrainableUnitType = typeof InfantryUnit | typeof VillagerUnit;
+
+type ProductionQueueItem = {
+  building: ProductionBuilding;
+  player: Player;
+  unitType: TrainableUnitType;
+  unitName: "Villager" | "Infantry";
+  durationMs: number;
+  startedAt: number | null;
+};
+
+const DEFAULT_TRAINING_DURATION_MS = 5_000;
+const UNIT_COSTS = {
+  Villager: { wood: 10, gold: 5 },
+  Infantry: { wood: 20, gold: 10 },
+} as const;
+
 /**
  * Initialize the game.
  */
@@ -196,6 +213,7 @@ function main() {
     blur: true,
     update: function () {
       gameState.update();
+      updateProductionQueue();
     },
     render: function () {
       renderer.render();
@@ -205,11 +223,14 @@ function main() {
       }
       updateSelectionPanel();
       updateResourceDisplay();
+      updateProductionQueueDisplay();
     },
   });
 
   const woodCountEl = document.getElementById("woodCount")!;
   const goldCountEl = document.getElementById("goldCount")!;
+  const productionQueueEl = document.getElementById("productionQueue")!;
+  const productionQueue: ProductionQueueItem[] = [];
 
   function updateResourceDisplay() {
     const player = gameState.players[0];
@@ -230,10 +251,10 @@ function main() {
   /**
  * Spawn a unit from a production building and move it to the building's way point.
  */
-function spawnUnitFromBuilding(
+  function spawnUnitFromBuilding(
     building: ProductionBuilding,
     player: Player,
-    unitType: typeof InfantryUnit | typeof VillagerUnit,
+    unitType: TrainableUnitType,
   ) {
     const spawnedUnit = spawner.spawnUnit(
       player,
@@ -252,14 +273,122 @@ function spawnUnitFromBuilding(
     return spawnedUnit;
   }
 
+  function enqueueUnitTraining(
+    building: ProductionBuilding,
+    player: Player,
+    unitType: TrainableUnitType,
+  ) {
+    const unitName = unitType === VillagerUnit ? "Villager" : "Infantry";
+    const cost = UNIT_COSTS[unitName];
+    if (player.wood < cost.wood || player.gold < cost.gold) {
+      return false;
+    }
+
+    player.wood -= cost.wood;
+    player.gold -= cost.gold;
+    productionQueue.push({
+      building,
+      player,
+      unitType,
+      unitName,
+      durationMs: DEFAULT_TRAINING_DURATION_MS,
+      startedAt: null,
+    });
+    return true;
+  }
+
+  function updateProductionQueue() {
+    const now = performance.now();
+
+    for (let i = productionQueue.length - 1; i >= 0; i--) {
+      const item = productionQueue[i];
+      if (item.building.currentHp <= 0 || !item.player.buildings.includes(item.building)) {
+        productionQueue.splice(i, 1);
+      }
+    }
+
+    const activeItem = productionQueue[0];
+    if (!activeItem) return;
+
+    if (activeItem.startedAt === null) {
+      activeItem.startedAt = now;
+      return;
+    }
+
+    if (now - activeItem.startedAt >= activeItem.durationMs) {
+      spawnUnitFromBuilding(activeItem.building, activeItem.player, activeItem.unitType);
+      productionQueue.shift();
+      if (productionQueue[0]) {
+        productionQueue[0].startedAt = now;
+      }
+    }
+  }
+
+  function selectProductionBuilding(building: ProductionBuilding) {
+    gameState.clearSelection();
+    building.isSelected = true;
+    gameState.select(building);
+  }
+
+  function getRemainingTrainingSeconds(item: ProductionQueueItem) {
+    if (item.startedAt === null) {
+      return item.durationMs / 1000;
+    }
+    const remainingMs = Math.max(0, item.durationMs - (performance.now() - item.startedAt));
+    return remainingMs / 1000;
+  }
+
+  function updateProductionQueueDisplay() {
+    productionQueueEl.replaceChildren();
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "productionQueueTitle";
+    titleEl.textContent = "Production Queue";
+    productionQueueEl.appendChild(titleEl);
+
+    if (productionQueue.length === 0) {
+      const emptyEl = document.createElement("div");
+      emptyEl.className = "productionQueueEmpty";
+      emptyEl.textContent = "Idle";
+      productionQueueEl.appendChild(emptyEl);
+      return;
+    }
+
+    for (const [index, item] of productionQueue.entries()) {
+      const button = document.createElement("button");
+      button.className = "productionQueueItem";
+      button.type = "button";
+      button.addEventListener("click", () => {
+        selectProductionBuilding(item.building);
+      });
+
+      const nameEl = document.createElement("span");
+      nameEl.className = "productionQueueName";
+      nameEl.textContent = item.unitName;
+
+      const durationEl = document.createElement("span");
+      durationEl.className = "productionQueueDuration";
+      durationEl.textContent = `${getRemainingTrainingSeconds(item).toFixed(1)}s`;
+
+      const stateEl = document.createElement("span");
+      stateEl.className = "productionQueueState";
+      stateEl.textContent = index === 0 ? "Training" : "Queued";
+
+      button.append(nameEl, durationEl, stateEl);
+      productionQueueEl.appendChild(button);
+    }
+  }
+
   document.getElementById("createVillager")?.addEventListener("click", () => {
-    console.log("Creating Villager");
-    spawnUnitFromBuilding(player1Building, player1, VillagerUnit);
+    if (!enqueueUnitTraining(player1Building, player1, VillagerUnit)) {
+      console.log("Not enough resources to create Villager");
+    }
   });
 
   document.getElementById("createInf")?.addEventListener("click", () => {
-    console.log("Creating Infantry");
-    spawnUnitFromBuilding(player1Building, player1, InfantryUnit);
+    if (!enqueueUnitTraining(player1Building, player1, InfantryUnit)) {
+      console.log("Not enough resources to create Infantry");
+    }
   });
 
   document.getElementById("createArch")?.addEventListener("click", () => {

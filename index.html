@@ -13,13 +13,16 @@
       <canvas id="gameCanvas" width="800" height="600"></canvas>
 
       <div id="bottomBar">
-        <div id="resourceDisplay">
-          <span id="woodCount">Wood: 0</span>
-          <span id="goldCount">Gold: 0</span>
+        <div id="resourcePanel">
+          <div id="resourceDisplay">
+            <span id="woodCount">Wood: 0</span>
+            <span id="goldCount">Gold: 0</span>
+          </div>
+          <div id="productionQueue"></div>
         </div>
         <div id="buttonGroup">
-          <button id="createVillager">Create Villager</button>
-          <button id="createInf">Create Inf</button>
+          <button id="createVillager">Create Villager (10 wood, 5 gold)</button>
+          <button id="createInf">Create Inf (20 wood, 10 gold)</button>
           <button id="createArch">Create Arch</button>
         </div>
         <div id="selectionDetails"></div>
@@ -78,6 +81,13 @@
       margin-top: 10px;
     }
 
+    #resourcePanel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 260px;
+    }
+
     #resourceDisplay {
       display: flex;
       gap: 16px;
@@ -96,6 +106,54 @@
 
     #resourceDisplay #goldCount {
       color: #fd0;
+    }
+
+    #productionQueue {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 88px;
+      padding: 10px 12px;
+      background-color: #1b1b1b;
+      border: 1px solid #444;
+      font-family: monospace;
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .productionQueueTitle {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .productionQueueEmpty {
+      color: #777;
+    }
+
+    .productionQueueItem {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      padding: 6px 8px;
+      font-family: monospace;
+      font-size: 13px;
+      text-align: left;
+      border: 1px solid #555;
+      background-color: #2b2b2b;
+    }
+
+    .productionQueueItem:hover {
+      background-color: #3a3a3a;
+    }
+
+    .productionQueueDuration {
+      color: #fd0;
+    }
+
+    .productionQueueState {
+      color: #999;
     }
 
     #buttonGroup {
