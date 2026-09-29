@@ -5,30 +5,31 @@
     - [ ] create basic sprite (single frame, for place holder)
         - [x] Swordsman
         - [x] Villager
-        - [ ] Town Center
+        - [x] Town Center
         - [ ] Archer
-    - 
     - [x] add idle animations
     - [x] implement unit selection
     - [x] implement unit movement
+    - [x] add production queue and training time
+    - [x] charge wood and gold to train units
 - pathing system
     - [x] create waypoints
-    - [ ] add world grid/nodes/mesh...whatever
-    - [ ] implement pathfinding alghorithm
-    - [ ] deal with colliison/obstacles
-    - [ ] implement pathfinding as a group (swarming?) behavior
+    - [x] add world grid/nodes/mesh...whatever
+    - [x] implement pathfinding algorithm
+    - [x] deal with collision/obstacles
+    - [x] implement pathfinding as a group (swarming?) behavior
 - add attack
-    - [ ] create attack animations
-    - [ ] add attack mechanics
+    - [x] create attack animations
+    - [x] add attack mechanics
 - add resources gathering
-    - [ ] Create villager sprites
-    - [ ] Add gathering animations
+    - [x] Create villager sprites
+    - [x] Add gathering animations
     - [x] spawn resources
-    - [ ] add resources UI
-        - [ ] display Gold and Wood collected
+    - [x] add resources UI
+        - [x] display Gold and Wood collected
         - [x] display selected unit info
-    - [ ] add resource nodes
-    - [ ] implement gathering mechanics
+    - [x] add resource nodes
+    - [x] implement gathering mechanics
 - add building construction
     - [ ] create building sprites
     - [ ] add construction animations
